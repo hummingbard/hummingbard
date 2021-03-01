@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"hummingbard/gomatrix"
 	"log"
 	"sort"
@@ -59,10 +60,12 @@ func (c *Client) GetAllPublicRooms() ([]*JoinedPublicRoom, error) {
 }
 
 type PublicRoom struct {
-	RoomID    string `json:"room_id"`
-	RoomPath  string `json:"room_path"`
-	RoomAlias string `json:"room_alias"`
-	Avatar    string `json:"avatar"`
+	RoomID    string        `json:"room_id"`
+	RoomPath  string        `json:"room_path"`
+	RoomAlias string        `json:"room_alias"`
+	Avatar    string        `json:"avatar"`
+	Name      string        `json:"name"`
+	Topic     template.HTML `json:"topic"`
 }
 
 func (c *Client) GetPublicRooms() ([]*PublicRoom, error) {
@@ -121,6 +124,23 @@ func (c *Client) GetPublicRooms() ([]*PublicRoom, error) {
 			if avatar.String() != "" {
 				room.Avatar = c.BuildAvatar(avatar.String())
 			}
+
+			name := gjson.Parse(string(st)).Get(`#(type="m.room.name")`).Get("content.name")
+			if name.String() != "" {
+				room.Name = name.String()
+			}
+
+			topic := gjson.Parse(string(st)).Get(`#(type="m.room.topic")`).Get("content.topic")
+			if topic.String() != "" {
+				html, err := ToStrictHTML(topic.String())
+				if err != nil {
+					log.Println(err)
+					room.Topic = template.HTML(topic.String())
+				} else {
+					room.Topic = html
+				}
+			}
+
 			rms = append(rms, room)
 		}
 	}

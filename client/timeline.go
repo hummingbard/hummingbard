@@ -263,7 +263,7 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 	children := []*ChildRoom{}
 	pages := []*ChildRoom{}
 
-	if path[0] == '@' {
+	if path[0] == '@' && len(pi) == 1 {
 		//this is for local user's timeline room
 		room = fmt.Sprintf(`#%s:%s`, path, c.Config.Client.Domain)
 		//this is for users on other homeservers
@@ -489,6 +489,7 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 		RoomState:     state,
 		IsUserProfile: profileRoom,
 	}
+
 	if len(events) > 0 {
 		t.LastEvent = events[len(events)-1].Timestamp
 	}

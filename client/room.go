@@ -63,12 +63,13 @@ func (c *Client) JoinRoom() http.HandlerFunc {
 			ff.Joined = true
 		}
 
-		nr := JoinedRoom{
-			RoomID:    pay.Id,
-			RoomAlias: pay.Alias,
+		rms, err := c.GetUserJoinedRooms(matrix)
+		if err != nil {
+			c.Error(w, r)
+			return
 		}
 
-		err = c.AddJoinedRoom(nr, r)
+		err = c.RefreshJoinedRooms(r, rms)
 		if err != nil {
 			log.Println(err)
 		}
@@ -138,14 +139,13 @@ func (c *Client) LeaveRoom() http.HandlerFunc {
 			ff.Left = true
 		}
 
-		rooms, err := matrix.JoinedRooms()
+		rms, err := c.GetUserJoinedRooms(matrix)
 		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), 400)
+			c.Error(w, r)
 			return
 		}
 
-		err = c.RefreshJoinedRooms(r, rooms.JoinedRooms)
+		err = c.RefreshJoinedRooms(r, rms)
 		if err != nil {
 			log.Println(err)
 		}
@@ -506,6 +506,33 @@ func (c *Client) GetRoomInfo() http.HandlerFunc {
 		}
 
 		ff.State = state
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	}
+}
+
+func (c *Client) FetchPublicSpaces() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		type Response struct {
+			Spaces interface{} `json:"spaces"`
+		}
+
+		rooms, err := c.GetPublicRoomsFromCache()
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		ff := Response{Spaces: rooms}
 
 		js, err := json.Marshal(ff)
 		if err != nil {

@@ -167,7 +167,7 @@ $: profile = window.timeline?.profile
 
 let SubSpaces;
 let subSpacesLoaded;
-$: if(!profile) {
+$: if(subTab) {
   import('./tabs/spaces/sub-spaces.svelte').then(res => {
     SubSpaces = res.default
     subSpacesLoaded = true
@@ -190,9 +190,9 @@ $: if(!profile) {
           on:click={switchTab}>Info</div>
         <div id="appearance" class="tab-item" class:active-tab={appTab}
           on:click={switchTab}>Appearance</div>
-        {#if !profile}
         <div id="sub-spaces" class="tab-item" class:active-tab={subTab}
           on:click={switchTab}>Sub-Spaces</div>
+        {#if !profile}
         <div id="pages" class="tab-item" class:active-tab={pagesTab}
           on:click={switchTab}>Pages</div>
         {/if}

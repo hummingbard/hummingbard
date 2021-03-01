@@ -18,6 +18,14 @@ let typeInput;
 
 let username = '';
 
+function resetUsername() {
+  usernameInput.value = ''
+  username = ''
+  available = false;
+  usernameAvailable = true;
+  usernameInput.focus()
+}
+
 let privateRoom = false;
 let nsfw = false;
 
@@ -65,7 +73,7 @@ function create() {
               window.location.href = `/${path}`
             }
           } else {
-            window.location.href = `/${username}`
+            window.location.href = `/${res?.alias}`
           }
         } else {
           dispatch('created', res?.room)
@@ -213,7 +221,7 @@ function cancel() {
 
     <div class="flex flex-column" class:mt3={!sub}>
       <div class="">
-        <span class="small bold">Username</span>
+        <span class="small bold">Name</span>
       </div>
       <div class="mt2 relative">
         <input
@@ -230,7 +238,7 @@ function cancel() {
           </div>
         {/if}
         {#if !usernameAvailable}
-          <div class="checking mh2 gr-default">
+          <div class="checking mh2 gr-default pointer" on:click={resetUsername}>
             <svg class="gr-center" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M5.72 5.72a.75.75 0 011.06 0L12 10.94l5.22-5.22a.75.75 0 111.06 1.06L13.06 12l5.22 5.22a.75.75 0 11-1.06 1.06L12 13.06l-5.22 5.22a.75.75 0 01-1.06-1.06L10.94 12 5.72 6.78a.75.75 0 010-1.06z"></path></svg>
           </div>
         {/if}
@@ -241,7 +249,11 @@ function cancel() {
         {/if}
       </div>
       <div class="mt2 fs-09">
+      {#if usernameAvailable}
         <span class="o-80">{domain}</span>/<span class="">{usernameText}</span>
+      {:else}
+        <span class="primary">That name is not available</span>
+      {/if}
       </div>
     </div>
 

@@ -5,6 +5,7 @@ import (
 	"hummingbard/gomatrix"
 	"log"
 	"net/http"
+	"sort"
 	"strings"
 
 	"github.com/gorilla/sessions"
@@ -14,6 +15,8 @@ import (
 type JoinedRoom struct {
 	RoomID    string `json:"room_id"`
 	RoomAlias string `json:"room_alias"`
+	Avatar    string `json:"avatar"`
+	Name      string `json:"name"`
 }
 
 type OwnedRoom struct {
@@ -181,7 +184,7 @@ func (c *Client) UpdateJoinedRooms(matrix *gomatrix.Client, r *http.Request) err
 	return nil
 }
 
-func (c *Client) RefreshJoinedRooms(r *http.Request, rooms []string) error {
+func (c *Client) RefreshJoinedRooms(r *http.Request, rooms []JoinedRoom) error {
 	s, err := c.Sessions.Get(r, c.Config.Client.CookieName)
 	if err != nil {
 		log.Println(err)
@@ -208,20 +211,7 @@ func (c *Client) RefreshJoinedRooms(r *http.Request, rooms []string) error {
 			return err
 		}
 
-		rms := []JoinedRoom{}
-		for i, _ := range rooms {
-			x := JoinedRoom{
-				RoomID: rooms[i],
-			}
-			room, ok := c.Cache.Rooms.Get(rooms[i])
-			if ok {
-				x.RoomAlias = room.(gomatrix.PublicRoom).CanonicalAlias
-			}
-
-			rms = append(rms, x)
-		}
-
-		us.JoinedRooms = rms
+		us.JoinedRooms = rooms
 
 		serialized, err := json.Marshal(us)
 		if err != nil {
@@ -452,8 +442,25 @@ func (c *Client) GetUserJoinedRooms(matrix *gomatrix.Client) ([]JoinedRoom, erro
 			!strings.Contains(alias.String(), "#@") &&
 			!strings.Contains(alias.String(), "#thread") &&
 			!strings.Contains(alias.String(), "#public") {
-			rms = append(rms, JoinedRoom{RoomID: roomID, RoomAlias: alias.String()})
+
+			rm := JoinedRoom{
+				RoomID:    roomID,
+				RoomAlias: alias.String(),
+			}
+
+			avatar := gjson.Parse(string(st)).Get(`#(type="m.room.avatar")`).Get("content.url")
+			if avatar.String() != "" {
+				rm.Avatar = c.BuildAvatar(avatar.String())
+			}
+
+			name := gjson.Parse(string(st)).Get(`#(type="m.room.name")`).Get("content.name")
+			if name.String() != "" {
+				rm.Name = name.String()
+			}
+
+			rms = append(rms, rm)
 		}
 	}
+	sort.Slice(rms, func(i, j int) bool { return rms[i].RoomAlias < rms[j].RoomAlias })
 	return rms, nil
 }

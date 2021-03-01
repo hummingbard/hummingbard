@@ -1,8 +1,12 @@
 <script>
 import {fade} from 'svelte/transition'
 import {onMount} from 'svelte'
+import ExploreSpaces from './explore-spaces.svelte'
+import JoinedRooms from './joined-rooms.svelte'
 
 let active = false;
+
+
 
 onMount(() => {
     /*
@@ -33,17 +37,28 @@ function toggle() {
     localStorage.setItem("nav", active);
 }
 
-function alias(alias) {
-    let x = alias.substring(1)
-    x = x.replace(`:${window.location.hostname}`, "")
-    x = x.replaceAll("_", "/")
-    return x
+
+let exploring = false;
+
+function explore() {
+    exploring = !exploring
 }
-let joined_rooms;
-if(identity?.joined_rooms) {
-    joined_rooms = identity?.joined_rooms;
-    joined_rooms?.sort((a, b) => (a.room_alias > b.room_alias) ? 1 : -1)
+
+$: if(exploring) {
+    killBodyScroll()
+} else 
+    unkillBodyScroll()
+
+function killBodyScroll() {
+    document.body.style.marginRight = `15px`
+    document.body.style.overflowY = "hidden"
 }
+
+function unkillBodyScroll() {
+    document.body.style.marginRight = 0
+    document.body.style.overflowY = "scroll"
+}
+
 </script>
 
 <div class="n flex flex-column">
@@ -68,10 +83,10 @@ if(identity?.joined_rooms) {
 
         <div class="flex fl-o pa3">
 
-            <div class="gr-center">
+            <div class="gr-center flex-one mr3">
+                <button class="light" style="width: 100%;" on:click={explore}>{exploring ? 'Done' : 'Explore Spaces'}</button>
             </div>
 
-            <div class="flex-one"></div>
 
             <div class="gr-default pointer" on:click={toggle}>
                 <div class="gr-center ">
@@ -83,26 +98,16 @@ if(identity?.joined_rooms) {
 
 
 
+        <div class="n-contain h-100 flex flex-column scr ">
+            {#if exploring}
+                <ExploreSpaces on:kill={explore}/>
+            {/if}
 
-        <div class="n-contain h-100 flex flex-column scr pa3">
-            <div class="">
-                <span class="bold small">Joined Spaces</span>
-            </div>
-            <div class="mt3">
-                    <div class="mb3 mr2">
-                        <a href="/public">
-                            <span class="primary fs-09">Public Feed</span>
-                        </a>
-                    </div>
-                {#each joined_rooms as room (room.room_id)}
-                    <div class="mb2 mr2">
-                        <a href="/{alias(room.room_alias)}">
-                            <span class="primary fs-09">{alias(room.room_alias)}</span>
-                        </a>
-                    </div>
-                {/each}
-            </div>
+
+            <JoinedRooms/>
+
         </div>
+
 
     </div>
 {/if}

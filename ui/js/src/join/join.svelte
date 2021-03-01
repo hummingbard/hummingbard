@@ -1,12 +1,21 @@
 <script>
 export let type;
 export let id;
-export let name;
+export let name = '';
 export let alias;
+export let inline;
 
 let joining = false;
 
-$: member = window.timeline?.member
+function isMember() {
+    let ind = identity?.joined_rooms.findIndex(x => x.room_id == id)
+    if(ind != -1) {
+        return true
+    }
+    return false
+}
+
+$: member = inline ? isMember() : window.timeline?.member
 
 $: joinText = (type == `user`) ? `Follow ${name}` : `Join ${name}`
 
@@ -49,10 +58,21 @@ function join() {
     joining = true
   joinRoom().then((res) => {
     console.log("joined?: ",res)
-      if(res?.joined || res?.left) {
-          location.reload()
+      if(res?.joined) {
+          if(!inline) {
+              location.reload()
+          } else {
+              member = true
+          }
+      } else if(res?.left) {
+          if(!inline) {
+              location.reload()
+          } else {
+              member = false
+          }
       }
   }).then(() => {
+      joining = false
   })
 }
 
