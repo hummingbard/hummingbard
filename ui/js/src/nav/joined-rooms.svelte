@@ -13,7 +13,7 @@ if(identity?.joined_rooms) {
     joined_rooms?.sort((a, b) => (a.room_alias > b.room_alias) ? 1 : -1)
 }
 
-let limit = 5
+let limit = 13
 
 function alias(alias) {
     let x = alias.substring(1)
