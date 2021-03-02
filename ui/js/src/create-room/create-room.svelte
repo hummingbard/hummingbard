@@ -73,7 +73,7 @@ function create() {
               window.location.href = `/${path}`
             }
           } else {
-            window.location.href = `/${res?.alias}`
+            window.location.href = `/${res?.room?.alias}`
           }
         } else {
           dispatch('created', res?.room)

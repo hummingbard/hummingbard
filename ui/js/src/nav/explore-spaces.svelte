@@ -18,11 +18,45 @@ onMount(() => {
     fetchSpaces().then(res => {
         console.log(res)
         if(res?.spaces?.length > 0) {
-            spaces = res?.spaces
+            spaces.push(...res?.spaces)
             fetched = true
         }
+    }).then(() => {
+        observer = new IntersectionObserver(callback, options);
+        observer.observe(obs);
     })
 })
+
+let observer;
+let obs;
+let options = {
+    rootMargin: `0px`,
+    threshold: 0.00,
+}
+
+
+function loadMore() {
+    fetchSpaces().then(res => {
+        console.log(res)
+        if(res?.spaces?.length > 0) {
+            res?.spaces.forEach(space => {
+                if(spaces.findIndex(x => x.room_id == space.room_id) == -1) {
+                    spaces = [...spaces, space]
+                }
+            })
+            fetched = true
+        }
+    }).then(() => {
+    })
+}
+
+function callback(entries, observer) {
+  entries.forEach(entry => {
+    if(entry.isIntersecting) {
+      loadMore()
+    }
+  })
+}
 
 function kill() {
     dispatch('kill', true)
@@ -31,8 +65,17 @@ function kill() {
 async function fetchSpaces() {
     let endpoint = `/spaces/public`
 
+    let data = {
+        offset: 0,
+    }
+
+    if(spaces.length > 0) {
+        data.offset = spaces.length
+    }
+
     let resp = await fetch(endpoint, {
-    method: 'GET', 
+    method: 'POST', 
+    body: JSON.stringify(data),
     headers:{
         'Content-Type': 'application/json'
     }
@@ -80,10 +123,14 @@ let query = '';
                 </div>
             {:else}
                 {#if spaces.length > 0}
-                    <div class="mx flex flex-column mt3 scrl ovfl-y">
-                    {#each items as space (space.room_id)}
-                        <SpaceItem space={space} />
-                    {/each}
+                    <div class="flex flex-column mt3 mx" >
+                        <div class="ovfl-y scrl">
+                        {#each items as space (space.room_id)}
+                            <SpaceItem space={space} />
+                        {/each}
+                      <div bind:this={obs}>
+                      </div>
+                        </div>
                     </div>
                 {:else}
                     <div class="pa4 tc">

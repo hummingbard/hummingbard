@@ -337,11 +337,6 @@ func (c *Client) ValidateRoomCreation() http.HandlerFunc {
 				Path:           path,
 			}
 
-			err = c.RefreshRoomsCache()
-			if err != nil {
-				log.Println(err)
-			}
-
 			err = c.UpdateJoinedRooms(matrix, r)
 			if err != nil {
 				log.Println(err)
@@ -378,6 +373,10 @@ func (c *Client) ValidateRoomCreation() http.HandlerFunc {
 						log.Println(err)
 						log.Println(err)
 					}
+				}
+				err = c.RefreshRoomsCache()
+				if err != nil {
+					log.Println(err)
 				}
 
 			}

@@ -3,13 +3,13 @@ import Join from '../join/join.svelte'
 export let space;
 
 function alias(alias) {
-    let x = alias.substring(1)
+    let x = alias?.substring(1)
     x = x.replace(`:${window.location.hostname}`, "")
     x = x.replaceAll("_", "/")
     return x
 }
 
-$: spaceAlias = alias(space.room_alias)
+$: spaceAlias = alias(space?.room_alias)
 </script>
 
 <div class="mb3 item pa2 flex flex-column mr3">
@@ -53,7 +53,6 @@ $: spaceAlias = alias(space.room_alias)
 .item {
   border: 1px solid var(--primary-grayish);
   border-radius: 13px;
-
 }
 .topic p{
   margin: 0;

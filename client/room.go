@@ -522,6 +522,24 @@ func (c *Client) GetRoomInfo() http.HandlerFunc {
 func (c *Client) FetchPublicSpaces() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		type payload struct {
+			Offset int `json:"offset"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+		err := json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
 		type Response struct {
 			Spaces interface{} `json:"spaces"`
 		}
@@ -532,7 +550,24 @@ func (c *Client) FetchPublicSpaces() http.HandlerFunc {
 			http.Error(w, err.Error(), 400)
 			return
 		}
+
 		ff := Response{Spaces: rooms}
+
+		l := 43
+
+		if pay.Offset != 0 {
+			if len(rooms) > pay.Offset+l {
+				ff.Spaces = rooms[pay.Offset : pay.Offset+l]
+			} else {
+				ff.Spaces = rooms[pay.Offset:]
+			}
+		} else {
+			if len(rooms) >= l {
+				ff.Spaces = rooms[:l]
+			} else {
+				ff.Spaces = rooms
+			}
+		}
 
 		js, err := json.Marshal(ff)
 		if err != nil {

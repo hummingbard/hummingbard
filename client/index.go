@@ -476,7 +476,7 @@ func (c *Client) GetFeedEvents() http.HandlerFunc {
 
 			switch {
 			case l > 14:
-				limit = 1
+				limit = 2
 			case l > 9 && l < 14:
 				limit = 3
 			case l > 5 && l <= 9:
