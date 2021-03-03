@@ -24,7 +24,7 @@ function alias(alias) {
         </div>
     {/if}
     <div class="gr-center flex-one ov-x-h" title={room.room_alias}>
-            <div class="primary fs-09 ov-x-h t-ov-h mr2">{alias(room.room_alias)}</div>
+            <div class="primary small ov-x-h t-ov-h mr2">{alias(room.room_alias)}</div>
     </div>
 </div>
 </a>
