@@ -83,11 +83,11 @@ function leaveRoom() {
 <a href="/{alias(room.room_alias)}">
     <div class="pv1 flex room-item ph1 jr-i" class:high={highlight}>
     {#if room.avatar?.length > 0}
-        <div class="thumbnail-s mr3">
+        <div class="thumbnail-s mr3 gr-center">
           <img src="{room.avatar}" />
         </div>
     {:else}
-        <div class="mr3">
+        <div class="mr3 gr-center">
             <svg class="gr-center" height="22" width="22">
                <circle cx="11" cy="11" r="11" stroke-width="0" fill="black" />
             </svg>
@@ -122,7 +122,7 @@ function leaveRoom() {
 </div>
 <style>
 .room-item {
-    transition: 0.1s;
+    transition: 0.05s;
     border-radius: 500px;
 }
 .room-item:hover {
@@ -139,7 +139,7 @@ function leaveRoom() {
 }
 .jr-m {
     opacity: 0;
-    transition: 0.1s;
+    transition: 0.05s;
 }
 .jr-h {
     opacity: 1;

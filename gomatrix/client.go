@@ -930,7 +930,7 @@ type RespSpaces struct {
 }
 
 func (cli *Client) Spaces(roomID string, req *ReqSpaces) (resp *RespSpaces, err error) {
-	u := cli.BuildURL("unstable", "rooms", roomID, "spaces")
+	u := cli.BuildURL("unstable", "org.matrix.msc2946", "rooms", roomID, "spaces")
 	err = cli.MakeRequest("POST", u, req, &resp)
 	return
 }
