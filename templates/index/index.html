@@ -7,103 +7,46 @@
 
   </head>
   <body>
-    <div class="root ind-rws">
+    <div class="root">
       {{template "header" Map "Page" . "Name" "index"}}
+
+      <div class="content-c ">
 
       <div class="ind-meta gr-default pv5 ph3">
         <div class="gr-center flex flex-column">
 
           <div class="flex flex-column tc">
-            <div class="f3 bold">
+            <div class="f2 bold">
               Hummingbard 
             </div>
-            <div class="mt3 f4 bold">
-              Decentralized Communities For The Future
+            <div class="mt3 f4 bold tc">Decentralized Communities For The Future</div>
+
+            <div class="mt4 flex gr-center ">
+              <div class="">
+                <a href="/signup">
+                  <button class="">Sign Up</button>
+                </a>
+              </div>
+              <div class="ml2">
+                <a href="/login">
+                  <button class="light">Log In</button>
+                </a>
+              </div>
             </div>
+            <div class="mt4 flex gr-center">
+              <a href="/public"><span class="small o-80"><u>View Public Feed</u></span></a>
+            </div>
+
           </div>
 
-          {{if gt (len .PublicRooms) 0}}
-            <div class="flex flex-column mt5">
-
-              <div class="gr-center">
-                <span class="small bold ncom">new communities</span>
-              </div>
-
-              <div class="gr-center flex flex-wrap justify-center mt4">
-                {{range .PublicRooms}}
-                  <div class="mr3 mb3 small">
-                    <a href="/{{.RoomPath}}"><span class="c-it {{if (HasColon .RoomPath)}}c-fe{{end}}">{{.RoomPath}}{{if (HasColon .RoomPath)}} 🌐{{end}}</span></a>
-                  </div>
-                {{end}}
-              </div>
-            </div>
-          {{end}}
 
         </div>
       </div>
 
-      <div class="content-c brd-lr ">
-        <div class="con">
-            <div class="posts">
 
-              <div class="pa3 brd-btm brd-tp gr-center">
-                <span class="small"><strong>Public Feed</strong></span>
-              </div>
-
-              {{$hms := .HomeServerURL}}
-              {{$rpth := .Room.Path}}
-              {{if .Posts}}
-                {{range $idx, $post := .Posts}}
-                  {{if (eq $post.Type "com.hummingbard.post")}}
-                    {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth}}
-                  {{end}}
-                {{end}}
-              {{else}}
-                <div class="gr-default h-100">
-                  <div class="gr-center small bold">
-                    No posts yet
-                  </div>
-                </div>
-              {{end}}
-            </div>
-        </div>
-
-          <div class="more-posts flex flex-column">
-            <div class="more-post-items">
-            </div>
-              <div class="load-more">
-                <button class="button">Load More</button>
-              </div>
-          </div>
-
-          <div class="timeline">
-          </div>
-          <script nonce={{.Nonce}}>
-            window.timeline = {
-                public: true,
-              room_id: {{.Room.ID}},
-              permalink: {{.IsPermalink}},
-              {{if .IsPermalink}}
-              event_id: {{.Room.EventID}},
-              thread_in_room_id: {{.Room.ThreadInRoomID}},
-              {{end}}
-              alias: {{.Room.Alias}},
-              profile: {{.IsUserProfile}},
-              initialPosts: JSON.parse({{.InitialPosts}}),
-              end: {{.LastEvent}},
-              owner: {{.IsOwner}},
-              admin: {{.IsAdmin}},
-              member: {{.IsMember}},
-              state: {{.Room.State}},
-              room_type: {{.Room.Type}},
-              room_path: {{.Room.Path}}
-            }
-            let homeserverURL = {{.HomeServerURL}}
-          </script>
       </div>
       {{template "state" .}}
       <script defer nonce={{.Nonce}} src="{{ InsertJS "index" }}"></script>
-      <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
 
     </div>
   </body>

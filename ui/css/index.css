@@ -121,9 +121,6 @@ a:link, a:visited {
   z-index: 53;
 }
 
-.ind-rws {
-    grid-template-rows: [header] 58px [meta] auto [content] 1fr;
-}
 .ind-meta {
     place-self: stretch;
     max-width: 1060px;
@@ -563,6 +560,7 @@ button {
     color: var(--d-b-t);
     background-color: var(--d-b);
     white-space: nowrap;
+    transition: 0.1s;
 }
 
 button:hover {
@@ -588,6 +586,7 @@ button[class="light"] {
     font-size: 0.8rem;
     font-weight: bold;
     white-space: nowrap;
+    transition: 0.1s;
 }
 
 button[class="light"]:hover {
