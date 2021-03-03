@@ -20,10 +20,10 @@ onMount(() => {
         console.log(res)
         if(res?.spaces?.length > 0) {
             spaces.push(...res?.spaces)
+            fetched = true
         }
     }).then(() => {
-        fetched = true
-        if(spaces.length > 0) {
+        if(fetched && spaces.length > 0) {
             observer = new IntersectionObserver(callback, options);
             observer.observe(obs);
         }
@@ -42,6 +42,10 @@ let noMore = false;
 
 function loadMore() {
     if(noMore) {
+        return
+    }
+    if(spaces.length < 13) {
+        noMore = true
         return
     }
     fetchSpaces().then(res => {

@@ -80,7 +80,7 @@
 
 
 body {
-    overflow-y: scroll;
+    overflow: hidden;
     background: var(--background);
     font-family: monospace, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-weight: normal;
@@ -131,6 +131,12 @@ a:link, a:visited {
     height: 100%;
     justify-self: center;
     align-self: start;
+    display: grid;
+}
+
+.container {
+  overflow-y: auto;
+  height: calc(100vh - 58px);
     display: grid;
 }
 
@@ -532,6 +538,14 @@ a:link, a:visited {
 }
 .smallest {
     font-size: 0.66rem;
+}
+
+.ov-x-h {
+    overflow-x: hidden;
+}
+
+.t-ov-h {
+    text-overflow: ellipsis;
 }
 
 .no-m p{

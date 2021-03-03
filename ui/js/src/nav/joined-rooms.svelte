@@ -7,7 +7,10 @@ let joined_rooms = [];
 if(identity?.joined_rooms) {
     identity?.joined_rooms.forEach(room => {
         if(!room.room_alias.includes('@')) {
-            joined_rooms.push(room)
+            let ind = joined_rooms.findIndex(x => x.room_alias == room.room_alias)
+            if(ind = -1) {
+                joined_rooms.push(room)
+            }
         }
     })
     joined_rooms?.sort((a, b) => (a.room_alias > b.room_alias) ? 1 : -1)

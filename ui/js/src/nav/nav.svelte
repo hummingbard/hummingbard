@@ -52,20 +52,6 @@ function explore() {
     exploring = !exploring
 }
 
-$: if(exploring) {
-    killBodyScroll()
-} else 
-    unkillBodyScroll()
-
-function killBodyScroll() {
-    document.body.style.marginRight = `15px`
-    document.body.style.overflowY = "hidden"
-}
-
-function unkillBodyScroll() {
-    document.body.style.marginRight = 0
-    document.body.style.overflowY = "scroll"
-}
 
 </script>
 

@@ -5,12 +5,6 @@
       <meta name="description" content="Matrix-powered communities.">
     {{template "common-head" .}}
 
-<style>
-canvas {
-  width: 100%;
-    height: 60vh;
-}
-</style>
   </head>
   <body>
     <div class="base {{if .LoggedInUser}}base-l{{end}}">
@@ -21,6 +15,7 @@ canvas {
         {{template "header" Map "Page" . "Name" "public"}}
 
 
+        <div class="container scrl">
         <div class="content-c brd-lr ">
           <div class="con">
               <div class="posts">
@@ -85,6 +80,7 @@ canvas {
         <script defer nonce={{.Nonce}} src="{{ InsertJS "index" }}"></script>
         <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
 
+      </div>
       </div>
     </div>
   </body>

@@ -12,6 +12,7 @@
       <div class="root">
         {{template "header" Map "Page" . "Name" "index-user"}}
 
+        <div class="container scrl">
         <div class="center-content">
 
           {{if .Posts}}
@@ -85,6 +86,7 @@
         {{template "state" .}}
         <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
 
+      </div>
       </div>
     </div>
   </body>

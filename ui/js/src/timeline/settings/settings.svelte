@@ -36,8 +36,6 @@ $: if(active) {
     unkillBodyScroll()
 
 function killBodyScroll() {
-    document.body.style.marginRight = `15px`
-    document.body.style.overflowY = "hidden"
   let nav = document.querySelector('.nav-de') 
   if(nav) {
     nav.classList.add('hide')
@@ -45,8 +43,6 @@ function killBodyScroll() {
 }
 
 function unkillBodyScroll() {
-    document.body.style.marginRight = 0
-    document.body.style.overflowY = "scroll"
   let nav = document.querySelector('.nav-de') 
   if(nav) {
     nav.classList.remove('hide')

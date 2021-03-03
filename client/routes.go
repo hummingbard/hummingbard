@@ -105,6 +105,11 @@ func routes(c *Client) chi.Router {
 		r.Get("/", c.PublicFeed())
 	})
 
+	r.Route("/settings", func(r chi.Router) {
+		r.Use(secureMiddleware.Handler)
+		r.Get("/", c.Settings())
+	})
+
 	r.Route("/spaces", func(r chi.Router) {
 		r.Use(secureMiddleware.Handler)
 		r.Post("/public", c.FetchPublicSpaces())

@@ -1,0 +1,43 @@
+{{define "settings"}}
+<html>
+  <head>
+    <title>Settings - Hummingbard</title>
+      <meta name="description" content="Matrix-powered communities.">
+    {{template "common-head" .}}
+
+  </head>
+  <body>
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
+      <div class="root">
+        {{template "header" Map "Page" . "Name" "public"}}
+
+
+        <div class="container scrl">
+        <div class="content-c brd-lr ">
+          <div class="con">
+              <div class="">
+
+
+                <div class="gr-default h-100">
+                  <div class="gr-center">
+                    TODO.
+                  </div>
+                </div>
+
+
+              </div>
+          </div>
+
+
+        </div>
+        {{template "state" .}}
+
+      </div>
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}

@@ -23,8 +23,8 @@ function alias(alias) {
             </svg>
         </div>
     {/if}
-    <div class="gr-center flex-one">
-            <div class="primary fs-09">{alias(room.room_alias)}</div>
+    <div class="gr-center flex-one ov-x-h" title={room.room_alias}>
+            <div class="primary fs-09 ov-x-h t-ov-h mr2">{alias(room.room_alias)}</div>
     </div>
 </div>
 </a>

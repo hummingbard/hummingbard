@@ -20,6 +20,7 @@
       <div class="root">
         {{template "header" Map "Page" . "Name" "timeline"}}
 
+        <div class="container scrl">
         <div class="content{{if .IsUserProfile}}-c{{else}} brd-r{{end}}">
           <div class="con brd-lr">
 
@@ -402,6 +403,7 @@
           {{template "timeline-sidebar" .}}
           {{end}}
 
+          </div>
         </div>
         {{template "state" .}}
         <script defer nonce={{.Nonce}} src="{{ InsertJS "timeline" }}"></script>
