@@ -1,19 +1,44 @@
 <script>
-import {tick} from 'svelte'
+import {tick, createEventDispatcher} from 'svelte'
+const dispatch = createEventDispatcher();
 import {fade} from 'svelte/transition'
 import JoinedRoomItem from './joined-room-item.svelte'
 
 let joined_rooms = [];
-if(identity?.joined_rooms) {
-    identity?.joined_rooms.forEach(room => {
-        if(!room.room_alias.includes('@')) {
-            let ind = joined_rooms.findIndex(x => x.room_alias == room.room_alias)
-            if(ind = -1) {
-                joined_rooms.push(room)
+function setup() {
+    if(identity?.joined_rooms) {
+        identity?.joined_rooms.forEach(room => {
+            if(!room.room_alias.includes('@')) {
+                let ind = joined_rooms.findIndex(x => x.room_alias == room.room_alias)
+                if(ind = -1) {
+                    joined_rooms.push(room)
+                }
+            }
+        })
+        joined_rooms?.sort((a, b) => (a.room_alias > b.room_alias) ? 1 : -1)
+    }
+}
+
+setup()
+
+window.navUpdateJoinedRoom = (state, room) => {
+    if(state == 'joined') {
+        let ind = joined_rooms.findIndex(x => x.room_id == room.room_id)
+        if(ind == -1) {
+            joined_rooms = [...joined_rooms, room]
+            identity.joined_rooms.push(room)
+        }
+    } else if(state == 'left') {
+        let ind = joined_rooms.findIndex(x => x.room_id == room.room_id)
+        if(ind != -1) {
+            joined_rooms.splice(ind, 1)
+            joined_rooms = joined_rooms
+            let indd = identity.joined_rooms.findIndex(x => x.room_id == room.room_id)
+            if(indd != -1) {
+                identity.joined_rooms.splice(indd, 1)
             }
         }
-    })
-    joined_rooms?.sort((a, b) => (a.room_alias > b.room_alias) ? 1 : -1)
+    }
 }
 
 let limit = 13
@@ -37,6 +62,11 @@ let active = true
 
 function toggle() {
     active = !active
+    if(!active) {
+        searching = false
+        query = ''
+        searchInput.value = ''
+    }
 }
 
 $: showMore = joined_rooms.length > limit
@@ -62,6 +92,7 @@ async function toggleSearch() {
     searching = !searching
     if(!searching) {
         searchInput.value = null
+        query = ''
     } else {
         await tick();
         searchInput.focus()
@@ -91,7 +122,7 @@ async function toggleSearch() {
         {/if}
         <div class="flex-one"></div>
         {#if active}
-            <div class="gr-center ml2 pointer" on:click={toggleSearch}>
+            <div class="gr-center ml2 pointer" class:o-50={searching} on:click={toggleSearch}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M11.5 7a4.499 4.499 0 11-8.998 0A4.499 4.499 0 0111.5 7zm-.82 4.74a6 6 0 111.06-1.06l3.04 3.04a.75.75 0 11-1.06 1.06l-3.04-3.04z"></path></svg>
         </div>
         {/if}

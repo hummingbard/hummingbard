@@ -1,4 +1,6 @@
 <script>
+import {createEventDispatcher} from 'svelte'
+const dispatch = createEventDispatcher();
 export let type;
 export let id;
 export let name = '';
@@ -64,12 +66,14 @@ function join() {
           } else {
               member = true
           }
+          dispatch('joined')
       } else if(res?.left) {
           if(!inline) {
               location.reload()
           } else {
               member = false
           }
+          dispatch('left')
       }
   }).then(() => {
       joining = false

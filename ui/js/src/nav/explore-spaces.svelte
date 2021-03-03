@@ -1,8 +1,7 @@
 <script>
-import {onMount} from 'svelte'
+import {onMount, createEventDispatcher} from 'svelte'
 import {fade} from 'svelte/transition'
 import SpaceItem from './explore-space-item.svelte'
-import { createEventDispatcher } from 'svelte'
 import {debounce} from '../utils/utils.js'
 const dispatch = createEventDispatcher();
 let fetched = false;fetch
@@ -204,7 +203,8 @@ function updated(e) {
                     <div class="flex flex-column mt3 mx" >
                         <div class="ovfl-y scrl">
                         {#each spaces as space (space.room_id)}
-                            <SpaceItem space={space} />
+                            <SpaceItem 
+                            space={space} />
                         {/each}
                               <div bind:this={obs}>
                               </div>
@@ -227,7 +227,8 @@ function updated(e) {
                     <div class="flex flex-column mt3 mx" >
                         <div class="ovfl-y scrl">
                         {#each results as space (space.room_id)}
-                            <SpaceItem space={space} />
+                            <SpaceItem 
+                            space={space} />
                         {/each}
                         </div>
                     </div>

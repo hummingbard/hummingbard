@@ -94,11 +94,12 @@ function explore() {
 
         <div class="n-contain h-100 flex flex-column scr ">
             {#if exploring}
-                <ExploreSpaces on:kill={explore}/>
+                <ExploreSpaces 
+                on:kill={explore}/>
             {/if}
 
 
-            <JoinedRooms/>
+            <JoinedRooms />
 
         </div>
 

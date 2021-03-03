@@ -1,4 +1,5 @@
 <script>
+
 import Join from '../join/join.svelte'
 export let space;
 
@@ -10,6 +11,15 @@ function alias(alias) {
 }
 
 $: spaceAlias = alias(space?.room_alias)
+
+function joined(e) {
+  window.navUpdateJoinedRoom('joined', space)
+}
+
+function left(e) {
+  window.navUpdateJoinedRoom('left', space)
+}
+
 </script>
 
 <div class="mb3 item pa2 flex flex-column mr3">
@@ -44,6 +54,8 @@ $: spaceAlias = alias(space?.room_alias)
         alias={space.room_alias}
         id={space.room_id}
         inline={true}
+        on:joined={joined}
+        on:left={left}
         />
     </div>
   </div>

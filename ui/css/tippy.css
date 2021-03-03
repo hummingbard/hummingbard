@@ -25,6 +25,11 @@
     width: 250px;
 }
 
+.tippy-box[data-theme~='options'] {
+    border-radius: 13px;
+    box-shadow: 0 10px 70px rgba(0,0,0,.14);
+}
+
 .tippy-box[data-theme~='popup'] {
     border-radius: 13px;
     box-shadow: 0 0px 50px rgba(0,0,0,.08);
