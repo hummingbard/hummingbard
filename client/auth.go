@@ -140,7 +140,7 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 
 		//check if a room exists for this username with canonical room alis in
 		//the format #@username:server.org
-		un := fmt.Sprintf(`#@%s:%s`, username, c.Config.Matrix.Server)
+		un := fmt.Sprintf(`#@%s:%s`, username, c.Config.Client.Domain)
 		if fu {
 			un = fmt.Sprintf(`#%s:%s`, us.LocalPart, us.ServerName)
 		}
@@ -269,6 +269,12 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 				u.AvatarURL = StripMXCPrefix(*profile.AvatarURL)
 			}
 		}
+
+		log.Println("what is res???", res)
+		log.Println("what is res???", res)
+		log.Println("what is res???", res)
+		log.Println("what is res???", res)
+		log.Println("what is res???", res)
 
 		if res != nil && res.RoomID != "" {
 			u.RoomID = string(res.RoomID)

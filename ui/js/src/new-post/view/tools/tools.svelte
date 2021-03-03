@@ -33,11 +33,6 @@ $: profile = window.timeline?.profile
     <div class="gr-center ml3">
       <NSFW store={store} on:toggleNSFW/>
     </div>
-    {#if !profile}
-      <div class="gr-center ml2">
-        <Anonymous store={store} on:toggleAnonymous/>
-      </div>
-    {/if}
   {/if}
 
   {#if allowArticle}

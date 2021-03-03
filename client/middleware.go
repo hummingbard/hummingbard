@@ -82,7 +82,6 @@ func (c *Client) RequireAuthentication(h http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		log.Println("lol")
 
 		token, ok := s.Values["access_token"].(string)
 

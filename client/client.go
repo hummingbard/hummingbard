@@ -28,18 +28,17 @@ func init() {
 }
 
 type Client struct {
-	Config        *config.Config
-	Router        *chi.Mux
-	HTTP          *http.Server
-	Templates     *Template
-	Sessions      *sessions.CookieStore
-	Store         *redis.Client
-	Matrix        *gomatrix.Client
-	DefaultUser   User
-	AnonymousUser User
-	Cache         *cache.Cache
-	DB            *DB
-	Cron          *cron.Cron
+	Config      *config.Config
+	Router      *chi.Mux
+	HTTP        *http.Server
+	Templates   *Template
+	Sessions    *sessions.CookieStore
+	Store       *redis.Client
+	Matrix      *gomatrix.Client
+	DefaultUser User
+	Cache       *cache.Cache
+	DB          *DB
+	Cron        *cron.Cron
 }
 
 func (c *Client) Activate() {
@@ -157,118 +156,6 @@ func Start() {
 
 	}
 
-	anonUser := User{}
-
-	//create @anonymous account if it doesn't exist yet
-	av, err := matrix.RegisterAvailable(&gomatrix.ReqRegisterAvailable{
-		Username: "anonymous",
-	})
-	if err != nil {
-		log.Println(err)
-	}
-
-	log.Println(av)
-
-	if av == nil || !av.Available {
-
-		ma, err := gomatrix.NewClient(server, "", "")
-		if err != nil {
-			panic(err)
-		}
-
-		resp, err := ma.Login(&gomatrix.ReqLogin{
-			Type:     "m.login.password",
-			User:     "anonymous",
-			Password: conf.Matrix.AnonymousPassword,
-		})
-
-		if resp != nil {
-			anonUser.UserID = resp.UserID
-			anonUser.AccessToken = resp.AccessToken
-		}
-
-	} else {
-
-		type Auth struct {
-			Type    string
-			Session string
-		}
-		rep, _, err := matrix.Register(&gomatrix.ReqRegister{
-			Username: "anonymous",
-			Password: conf.Matrix.AnonymousPassword,
-			Auth: Auth{
-				Type: "m.login.dummy",
-			},
-		})
-		log.Println(rep)
-
-		if err != nil || rep == nil {
-			log.Println(err)
-		}
-
-		anonUser.UserID = rep.UserID
-		anonUser.AccessToken = rep.AccessToken
-	}
-
-	//create @anonymous user's profile
-	acr, err := matrix.CreateRoom(&gomatrix.ReqCreateRoom{
-		Visibility:    "public",
-		Preset:        "public_chat",
-		RoomAliasName: fmt.Sprintf(`@%s`, "anonymous"),
-		Name:          fmt.Sprintf(`@%s's Timeline`, "anonymous"),
-		Topic:         fmt.Sprintf(`This is @%s's hummingbard profile page. Follow them to post on their timeline.`, "anonymous"),
-		CreationContent: map[string]interface{}{
-			"m.federate": true,
-		},
-		InitialState: []gomatrix.Event{gomatrix.Event{
-			Type: "m.room.history_visibility",
-			Content: map[string]interface{}{
-				"history_visibility": "world_readable",
-			},
-		}, gomatrix.Event{
-			Type: "m.room.guest_access",
-			Content: map[string]interface{}{
-				"guest_access": "can_join",
-			},
-		}, gomatrix.Event{
-			Type: "com.hummingbard.room",
-			Content: map[string]interface{}{
-				"type": "profile",
-			},
-		}, gomatrix.Event{
-			Type: "m.room.power_levels",
-			Content: map[string]interface{}{
-				"ban": 50,
-				"events": map[string]interface{}{
-					"m.room.name":         100,
-					"m.room.power_levels": 100,
-				},
-				"events_default": 0,
-				"invite":         50,
-				"kick":           50,
-				"notifications": map[string]interface{}{
-					"room": 20,
-				},
-				"redact":        50,
-				"state_default": 50,
-				"users": map[string]interface{}{
-					anonUser.UserID: 100,
-					defUser.UserID:  100,
-				},
-				"users_default": 0,
-			},
-		}},
-	})
-	if err != nil || acr == nil {
-		log.Println(err)
-	}
-
-	pub := fmt.Sprintf(`#@anonymous:%s`, conf.Client.Domain)
-	_, err = matrix.JoinRoom(pub, "", nil)
-	if err != nil {
-		log.Println(err)
-	}
-
 	//does default #public room exist?
 	//create #public room
 	un := fmt.Sprintf(`#public:%s`, conf.Matrix.Server)
@@ -300,24 +187,7 @@ func Start() {
 			log.Println(err)
 		}
 		pub := fmt.Sprintf(`#public:%s`, conf.Client.Domain)
-		jr, err := matrix.JoinRoom(pub, "", nil)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println("join?", jr)
-
-		nm, err := gomatrix.NewClient(server, anonUser.UserID, anonUser.AccessToken)
-		if err != nil {
-			log.Println(err)
-		}
-
-		_, err = nm.JoinRoom(pub, "", nil)
-		if err != nil {
-			log.Println(err)
-		}
-
-		apub := fmt.Sprintf(`#@anonymous:%s`, conf.Client.Domain)
-		_, err = nm.JoinRoom(apub, "", nil)
+		_, err = matrix.JoinRoom(pub, "", nil)
 		if err != nil {
 			log.Println(err)
 		}
@@ -345,14 +215,13 @@ func Start() {
 			Addr:         conf.Client.Port,
 			Handler:      router,
 		},
-		Router:        router,
-		Templates:     tmpl,
-		Sessions:      sess,
-		Store:         redis,
-		Cache:         cache,
-		DefaultUser:   defUser,
-		AnonymousUser: anonUser,
-		Cron:          cron,
+		Router:      router,
+		Templates:   tmpl,
+		Sessions:    sess,
+		Store:       redis,
+		Cache:       cache,
+		DefaultUser: defUser,
+		Cron:        cron,
 	}
 
 	c.Middleware()

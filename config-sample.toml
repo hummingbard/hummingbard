@@ -1,6 +1,6 @@
 name = "hummingbard"
 mode = "development"
-youtube_key ="your-youtube-api-key"
+# youtube_key ="your-youtube-api-key"
 
 [client]
 domain = "hummingbard.com"
@@ -12,7 +12,6 @@ secure_cookie = "something_random"
 server = "localhost.com"
 port = 8008
 password = "CaR6hxVWKBzYn"
-anonymous_password = "blahblah"
 
 [db]
 user = "hummingbard"

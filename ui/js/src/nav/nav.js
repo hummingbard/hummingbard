@@ -7,3 +7,12 @@ if(nav){
     })
   })
 }
+let ies = document.querySelector('.index-explore-spaces')
+if(ies){
+  import('./index-explore-spaces.svelte').then(res => {
+    new res.default({
+      target: ies,
+      hydrate: true,
+    })
+  })
+}

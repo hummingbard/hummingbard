@@ -79,11 +79,13 @@ async function toggleSearch() {
         <div class="gr-center pointer" on:click={toggle}>
             <span class="bold small no-select">Joined Spaces</span>
         </div>
+        {#if joined_rooms.length > 0}
         <div class="gr-default count ml2">
             <div class="gr-center">
-                <span class="smaller "> {joined_rooms.length > 0 ? count : ''}</span>
+                <span class="smallest bold "> {joined_rooms.length > 0 ? count : ''}</span>
             </div>
         </div>
+        {/if}
         <div class="flex-one"></div>
         {#if active}
             <div class="gr-center ml2 pointer" on:click={toggleSearch}>
@@ -97,11 +99,11 @@ async function toggleSearch() {
         <div class="ph3 mt2 small">
             <input bind:this={searchInput} bind:value={query}
                    on:keydown={updateQuery}
-            placeholder="Filter Joined Rooms"/>
+            placeholder="Filter Joined Spaces"/>
         </div>
     {/if}
 
-    <div class="shm mt3 ph2" transition:fade="{{duration: 53}}">
+    <div class="shm mt3 ph2 lh-copy" transition:fade="{{duration: 53}}">
         {#if showMore || searching}
             {#each shortened as room (room.room_id)}
                 <JoinedRoomItem room={room}/>
@@ -115,6 +117,12 @@ async function toggleSearch() {
         {#if searching && shortened.length == 0}
             <div class="gr-default pa2 small ">
                     No matches.
+            </div>
+        {/if}
+
+        {#if joined_rooms.length == 0}
+            <div class="fs-09 ph2">
+                You have't joined any spaces yet.
             </div>
         {/if}
     </div>
@@ -142,10 +150,10 @@ async function toggleSearch() {
 
 <style>
 .count {
-    background: var(--primary-grayish);
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    background: var(--primary-dark);
+    color: var(--white);
+    border-radius: 500px;
+    padding: 0.125rem 0.5rem;
 }
 
 .shm:hover .show-hint {

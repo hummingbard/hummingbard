@@ -1166,16 +1166,5 @@ func (c *Client) OperatorJoinRoom(roomID string) error {
 		return err
 	}
 
-	matrix, err := c.TempMatrixClient(c.AnonymousUser.UserID, c.AnonymousUser.AccessToken)
-	if err != nil {
-		log.Println(err)
-	}
-
-	_, err = matrix.JoinRoom(roomID, "", nil)
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-
 	return nil
 }

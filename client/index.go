@@ -399,6 +399,7 @@ func (c *Client) WelcomePage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
+
 	if rooms != nil && len(rooms) > 0 {
 		r := []*PublicRoom{}
 		for i, x := range rooms {
@@ -411,6 +412,9 @@ func (c *Client) WelcomePage(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		t.Rooms = r
+	} else {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
 	}
 
 	t.Nonce = nonce

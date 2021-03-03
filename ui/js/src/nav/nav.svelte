@@ -19,6 +19,14 @@ onMount(() => {
         }
     }
     */
+    window.exploreSpaces = (ok) => {
+        active = true
+        let el = document.querySelector('.nav-de')
+        if(el) {
+            el.classList.add('nav-de-ac')
+        }
+        exploring = true
+    }
 })
 
 function toggle() {

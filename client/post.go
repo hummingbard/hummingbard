@@ -126,11 +126,6 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 		userid := user.UserID
 		accessToken := user.MatrixAccessToken
 
-		if pay.Anonymous {
-			userid = c.AnonymousUser.UserID
-			accessToken = c.AnonymousUser.AccessToken
-		}
-
 		matrix, err := gomatrix.NewClient(serverName, userid, accessToken)
 
 		roomCreateEventID := ""

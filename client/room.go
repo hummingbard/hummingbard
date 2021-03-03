@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
+	"hummingbard/gomatrix"
 	"log"
 	"net/http"
 	"strings"
@@ -423,13 +424,16 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			}
 			if owner {
 
-				err = matrix.SetAvatarURL(pay.Info.Avatar)
-				if err != nil {
-					log.Println(err)
-					http.Error(w, err.Error(), 400)
-					return
-				}
-				c.UpdateAvatar(r, pay.Info.Avatar)
+				// This seems to lock up the entire app. Why?
+				/*
+					err = matrix.SetAvatarURL(pay.Info.Avatar)
+					if err != nil {
+						log.Println(err)
+						http.Error(w, err.Error(), 400)
+						return
+					}
+					c.UpdateAvatar(r, pay.Info.Avatar)
+				*/
 			}
 		}
 
@@ -551,7 +555,7 @@ func (c *Client) FetchPublicSpaces() http.HandlerFunc {
 			return
 		}
 
-		ff := Response{Spaces: rooms}
+		ff := Response{}
 
 		l := 43
 
@@ -568,6 +572,96 @@ func (c *Client) FetchPublicSpaces() http.HandlerFunc {
 				ff.Spaces = rooms
 			}
 		}
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	}
+}
+
+func (c *Client) Queryspace() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		token := r.Header.Get("Authorization")
+
+		user, err := c.GetTokenUser(token)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		type payload struct {
+			Query string `json:"query"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+		err = json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
+		type Response struct {
+			Spaces interface{} `json:"spaces"`
+		}
+
+		rooms, err := c.GetPublicRoomsFromCache()
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		fed, use := FederationRoom(pay.Query)
+
+		if fed {
+			wk, err := WellKnown(c.URLScheme(use.ServerName))
+			if err == nil {
+				serverName := c.URLScheme(wk.ServerName)
+
+				cli, err := gomatrix.NewClient(serverName, user.UserID, user.MatrixAccessToken)
+				if err != nil {
+					log.Println(err)
+				}
+				canon := pay.Query
+				if canon[0] != '#' {
+					canon = fmt.Sprintf(`#%s`, canon)
+				}
+				ra, err := cli.ResolveAlias(canon)
+				if err != nil {
+					log.Println(err)
+				}
+				if ra != nil {
+					log.Println(ra.RoomID)
+				}
+			}
+		}
+
+		ff := Response{}
+
+		rm := []*PublicRoom{}
+		for _, room := range rooms {
+			if strings.Contains(room.RoomAlias, pay.Query) ||
+				strings.Contains(room.Name, pay.Query) ||
+				strings.Contains(string(room.Topic), pay.Query) {
+				rm = append(rm, room)
+			}
+		}
+		ff.Spaces = rm
 
 		js, err := json.Marshal(ff)
 		if err != nil {

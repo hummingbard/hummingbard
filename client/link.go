@@ -63,12 +63,14 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 			return
 		}
 
+		key := c.Config.YoutubeKey
+
 		isYoutube := up.Host == "www.youtube.com" || up.Host == "youtube.com"
 		isShortYoutube := up.Host == "youtu.be"
 
 		var title, description, image, author string
 
-		if isYoutube || isShortYoutube {
+		if (isYoutube || isShortYoutube) && len(key) > 0 {
 
 			m, err := url.ParseQuery(up.RawQuery)
 			if err != nil {
@@ -89,8 +91,6 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 					id = up.Path[1:]
 				}
 			}
-
-			key := c.Config.YoutubeKey
 
 			ctx := context.Background()
 			ctx, _ = context.WithTimeout(ctx, 7*time.Second)

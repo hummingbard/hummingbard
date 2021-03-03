@@ -108,6 +108,7 @@ func routes(c *Client) chi.Router {
 	r.Route("/spaces", func(r chi.Router) {
 		r.Use(secureMiddleware.Handler)
 		r.Post("/public", c.FetchPublicSpaces())
+		r.Post("/query", c.Queryspace())
 	})
 
 	r.Route("/room", func(r chi.Router) {
