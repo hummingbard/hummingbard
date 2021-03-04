@@ -486,6 +486,7 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 			Pages:     pages,
 		},
 		Posts:         posts,
+		RoomState:     state,
 		IsUserProfile: profileRoom,
 	}
 
@@ -810,6 +811,7 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 			Children:  children,
 			Pages:     pages,
 		},
+		RoomState:     state,
 		IsUserProfile: profileRoom,
 	}
 	processed := c.ProcessMessages(relationships, state, us)

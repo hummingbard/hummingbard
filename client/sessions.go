@@ -439,7 +439,6 @@ func (c *Client) GetUserJoinedRooms(matrix *gomatrix.Client) ([]JoinedRoom, erro
 		}
 		alias := gjson.Parse(string(st)).Get(`#(type="m.room.canonical_alias")`).Get("content.alias")
 		if len(alias.String()) > 0 &&
-			!strings.Contains(alias.String(), "#@") &&
 			!strings.Contains(alias.String(), "#thread") &&
 			!strings.Contains(alias.String(), "#public") {
 
