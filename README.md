@@ -1,6 +1,6 @@
 # Hummingbard
 
-Hummingbard is an experimental client for building decentralized communities on top of [Matrix](https:/matrix.org). See a live instance on [hummingbard.com](https://hummingbard.com)
+Hummingbard is an experimental client for building decentralized communities on top of [Matrix](https://matrix.org). See a live instance on [hummingbard.com](https://hummingbard.com)
 
 
 ### What Works
