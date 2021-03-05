@@ -44,6 +44,7 @@ var fMap = template.FuncMap{
 	"Concat":         concat,
 	"Trunc":          truncate,
 	"HasColon":       hasColon,
+	"Repeat":         repeat,
 }
 
 func hasColon(s string) bool {
@@ -66,6 +67,14 @@ func concat(values ...string) string {
 
 func sum(i, g int) int {
 	return i + g
+}
+
+func repeat(s string, g int) string {
+	x := ``
+	for i := 0; i < g; i++ {
+		x += s
+	}
+	return x
 }
 
 func title(s string) string {

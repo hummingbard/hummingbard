@@ -418,11 +418,15 @@ func GetLocalPart(s string) string {
 	x := strings.Split(s, ":")
 	return x[0]
 }
-func (c *Client) GetLocalPartPath(s string) string {
+func (c *Client) GetLocalPartPath(s string, profile bool) string {
 	s = s[1:]
 	x := strings.Split(s, ":")
 
 	g := strings.Split(x[0], "_")
+
+	if profile {
+		g = g[1:]
+	}
 
 	if !strings.Contains(x[1], c.Config.Client.Domain) {
 		g[0] = fmt.Sprintf(`%s:%s`, g[0], x[1])

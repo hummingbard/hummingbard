@@ -207,6 +207,16 @@ if(edp && authenticated) {
   })
 }
 
+let uss = document.querySelector(`.user-sub-spaces`)
+if(uss) {
+  import('./profile/sub-spaces.svelte').then(res => {
+      new res.default({
+          target: uss,
+          hydrate: true
+      });
+  })
+}
+
 let shp = document.querySelector(`.share-post`)
 if(shp && authenticated) {
   import('../share-post/share-post.svelte').then(res => {

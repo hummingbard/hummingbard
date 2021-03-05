@@ -13,6 +13,8 @@ function removeAvatar(e) {
 }
 
 
+$: about = window.timeline?.profile ? `About you` : `About this community`
+
 </script>
 
 
@@ -37,7 +39,7 @@ function removeAvatar(e) {
     <div class="mt2">
       <textarea
         style="height:100px;"
-        placeholder="About this community."
+        placeholder={about}
         bind:value={$settings.info.about}
       ></textarea>
     </div>

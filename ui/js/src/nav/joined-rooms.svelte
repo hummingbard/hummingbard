@@ -65,7 +65,9 @@ function toggle() {
     if(!active) {
         searching = false
         query = ''
-        searchInput.value = ''
+        if(searchInput) {
+            searchInput.value = ''
+        }
     }
 }
 

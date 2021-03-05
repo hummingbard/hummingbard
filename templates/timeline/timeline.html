@@ -86,9 +86,14 @@
                   </div>
 
                   <div class="mt4 flex">
-                    <div class="o-80 fs-09">
+                    <div class="o-80 fs-09 flex-one">
                       Joined on {{.Room.CreatedAt}}
                     </div>
+                    {{if gt .Room.Members 0}}
+                    <div class="gr-center fs-09">
+                      <strong>{{.Room.Members}}</strong> Follower{{if gt .Room.Members 1}}s{{end}}
+                    </div>
+                    {{end}}
                   </div>
 
 
@@ -158,9 +163,15 @@
               {{end}}
 
               {{if and .IsUserProfile (not .IsPermalink)}}
-                {{if gt .Room.Members 0}}
-                <div class="gr-center fs-09">
-                  <strong>{{.Room.Members}}</strong> Follower{{if gt .Room.Members 1}}s{{end}}
+                {{if .Room.Children}}
+                <div class="small user-sub-spaces">
+                  <select>
+                    <option>Sub-Spaces</option>
+                    <option disabled>----------</option>
+                    {{range .Room.Children}}
+                      {{template "children-alt" Map "Child" . "Nested" false "Level" 0}}
+                    {{end}}
+                  </select>
                 </div>
                 {{end}}
               {{end}}

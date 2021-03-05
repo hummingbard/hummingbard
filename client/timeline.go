@@ -8,6 +8,7 @@ import (
 	"hummingbard/gomatrix"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -79,7 +80,7 @@ type TimelinePage struct {
 	Sort             string      `json:"sort"`
 }
 
-func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, page bool) []*ChildRoom {
+func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, page bool, profile bool) []*ChildRoom {
 
 	rooms := []*ChildRoom{}
 
@@ -98,7 +99,7 @@ func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, 
 				RoomID: child.RoomID,
 			}
 			if alias, ok := child.Content["canonical_alias"].(string); ok {
-				y.Path = c.GetLocalPartPath(alias)
+				y.Path = c.GetLocalPartPath(alias, profile)
 			}
 			if stripped, ok := child.Content["stripped"].(string); ok {
 				y.Alias = stripped
@@ -106,6 +107,8 @@ func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, 
 			rooms = append(rooms, &y)
 		}
 	}
+
+	sort.Slice(rooms, func(i, j int) bool { return rooms[i].Path < rooms[j].Path })
 
 	var findChildren func(id string) []*ChildRoom
 
@@ -126,7 +129,7 @@ func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, 
 					RoomID: child.RoomID,
 				}
 				if alias, ok := child.Content["canonical_alias"].(string); ok {
-					y.Path = c.GetLocalPartPath(alias)
+					y.Path = c.GetLocalPartPath(alias, profile)
 				}
 				if stripped, ok := child.Content["stripped"].(string); ok {
 					y.Alias = stripped
@@ -457,8 +460,8 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 
 		if spaces != nil {
 			if len(spaces.Events) > 0 {
-				children = c.BuildSpaceChildren(roomID, spaces, false)
-				pages = c.BuildSpaceChildren(roomID, spaces, true)
+				children = c.BuildSpaceChildren(roomID, spaces, false, profileRoom)
+				pages = c.BuildSpaceChildren(roomID, spaces, true, profileRoom)
 			}
 		}
 
@@ -780,8 +783,8 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 
 		if spaces != nil {
 			if len(spaces.Events) > 0 {
-				children = c.BuildSpaceChildren(roomID, spaces, false)
-				pages = c.BuildSpaceChildren(roomID, spaces, true)
+				children = c.BuildSpaceChildren(roomID, spaces, false, profileRoom)
+				pages = c.BuildSpaceChildren(roomID, spaces, true, profileRoom)
 			}
 		}
 

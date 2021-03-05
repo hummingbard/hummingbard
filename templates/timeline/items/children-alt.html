@@ -1,0 +1,12 @@
+{{define "children-alt"}}
+<option>{{.Child.Path}}</option>
+
+  {{$level := Sum .Level 1}}
+
+  {{if .Child.Children}}
+    {{range .Child.Children}}
+      {{template "children-alt" Map "Child" . "Nested" true "Level" $level}}
+    {{end}}
+  {{end}}
+
+{{end}}
