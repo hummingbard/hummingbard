@@ -1,0 +1,60 @@
+{{define "collections"}}
+<html>
+  <head>
+    <title>Collections - Hummingbard</title>
+    <meta name="description" content="{{.Room.Topic}}">
+    {{template "common-head" .}}
+
+{{if gt (len .Room.CSS) 0}}
+<style nonce="{{.Nonce}}" type="text/css">
+{{.Room.CSS}}
+</style>
+{{end}}
+
+  </head>
+  <body>
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
+      <div class="root">
+        {{template "header" Map "Page" . "Name" "timeline"}}
+
+        <div class="container scrl">
+        <div class="content-c">
+          <div class="col-c brd-lr">
+
+            <div class=" pa3 brd-btm flex" style="height:60px;">
+              <div class="gr-center">
+                <span class="small bold">{{.Room.Path}}'s Collections</span>
+              </div>
+            </div>
+
+            <div class="collections gr-default">
+              <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
+            </div>
+
+          </div>
+        </div>
+            <script nonce={{.Nonce}}>
+              window.timeline = {
+                room_id: {{.Room.ID}},
+                alias: {{.Room.Alias}},
+                owner: {{.IsOwner}},
+                admin: {{.IsAdmin}},
+                member: {{.IsMember}},
+                state: {{.Room.State}},
+                room_type: {{.Room.Type}},
+                room_path: {{.Room.Path}},
+                collections: {{.Room.Children}},
+              }
+              let homeserverURL = {{.HomeServerURL}}
+            </script>
+        {{template "state" .}}
+        <script defer nonce={{.Nonce}} src="{{ InsertJS "collections" }}"></script>
+
+      </div>
+    </div>
+  </body>
+</html>
+{{end}}

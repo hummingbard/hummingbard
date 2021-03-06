@@ -7,8 +7,8 @@ module.exports = {
   watchOptions: {
     ignored: /node_modules/
   },
-  mode: 'development',
-  //devtool: false,
+  mode: 'production',
+  devtool: false,
   entry: {
     default: './src/default',
     nav: './src/nav/nav',
@@ -60,7 +60,7 @@ module.exports = {
     publicPath: '/static/js/'
   },
   optimization: {
-    minimize: false,
+    minimize: true,
     usedExports: false,
     moduleIds: 'deterministic',
     removeAvailableModules: true,
