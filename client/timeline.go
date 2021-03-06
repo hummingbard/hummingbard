@@ -73,6 +73,7 @@ type TimelinePage struct {
 	IsMember         bool        `json:"is_member"`
 	HomeServerURL    string      `json:"home_server_url"`
 	IsUserProfile    bool        `json:"is_user_profile"`
+	IsFederated      bool        `json:"is_federated"`
 	IsOwner          bool        `json:"is_owner"`
 	IsAdmin          bool        `json:"is_admin"`
 	LastEvent        interface{} `json:"last_event"`
@@ -266,6 +267,12 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 	children := []*ChildRoom{}
 	pages := []*ChildRoom{}
 
+	//hitting user collections endpoint?
+	if path[0] == '@' && (len(pi) > 1 && pi[1] == "collections") {
+		c.UserCollections(w, r)
+		return
+	}
+
 	if path[0] == '@' && len(pi) == 1 {
 		//this is for local user's timeline room
 		room = fmt.Sprintf(`#%s:%s`, path, c.Config.Client.Domain)
@@ -315,7 +322,8 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 	//check if it's a user profile timeline
 	var profile *gomatrix.RespProfile
 	if fed {
-		profile, err = cli.GetProfile(path)
+		path := pathItems.Items
+		profile, err = cli.GetProfile(path[0])
 		if err != nil {
 			log.Println(err)
 			c.NotFound(w, r)
@@ -491,6 +499,7 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 		Posts:         posts,
 		RoomState:     state,
 		IsUserProfile: profileRoom,
+		IsFederated:   fed,
 	}
 
 	if len(events) > 0 {
@@ -816,6 +825,7 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 		},
 		RoomState:     state,
 		IsUserProfile: profileRoom,
+		IsFederated:   fed,
 	}
 	processed := c.ProcessMessages(relationships, state, us)
 
@@ -844,7 +854,6 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 		}
 	}
 
-	log.Println("pid is ", pid)
 	t.Posts = c.SortReplies(processed, pid, sort)
 
 	t.Room.ThreadInRoomID = string(ra.RoomID)

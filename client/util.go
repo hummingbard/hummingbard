@@ -428,7 +428,7 @@ func (c *Client) GetLocalPartPath(s string, profile bool) string {
 		g = g[1:]
 	}
 
-	if !strings.Contains(x[1], c.Config.Client.Domain) {
+	if !strings.Contains(x[1], c.Config.Client.Domain) && !profile {
 		g[0] = fmt.Sprintf(`%s:%s`, g[0], x[1])
 	}
 

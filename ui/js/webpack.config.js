@@ -7,8 +7,8 @@ module.exports = {
   watchOptions: {
     ignored: /node_modules/
   },
-  mode: 'production',
-  devtool: false,
+  mode: 'development',
+  //devtool: false,
   entry: {
     default: './src/default',
     nav: './src/nav/nav',
@@ -20,6 +20,7 @@ module.exports = {
     createRoom: './src/create-room/create-room',
     welcome: './src/welcome/welcome',
     popup: './src/popup/popup',
+    collections: './src/collections/collections',
   },
   module: {
     rules: [
@@ -59,7 +60,7 @@ module.exports = {
     publicPath: '/static/js/'
   },
   optimization: {
-    minimize: true,
+    minimize: false,
     usedExports: false,
     moduleIds: 'deterministic',
     removeAvailableModules: true,

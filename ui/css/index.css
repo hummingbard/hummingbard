@@ -1197,6 +1197,12 @@ pre::-webkit-scrollbar-thumb {
     height: 100%;
 }
 
+
+.col-c {
+  display: grid;
+  grid-template-rows: [meta] auto [content] 1fr;
+}
+
 @media screen and (max-width: 768px) {
 .post-content {
   font-size: 0.9rem;

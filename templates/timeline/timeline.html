@@ -395,6 +395,7 @@
                 {{end}}
                 alias: {{.Room.Alias}},
                 profile: {{.IsUserProfile}},
+                federated: {{.IsFederated}},
                 initialPosts: JSON.parse({{.InitialPosts}}),
                 end: {{.LastEvent}},
                 owner: {{.IsOwner}},

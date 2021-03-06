@@ -424,13 +424,16 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			}
 			if owner {
 
-				err = matrix.SetAvatarURL(pay.Info.Avatar)
-				if err != nil {
-					log.Println(err)
-					http.Error(w, err.Error(), 400)
-					return
-				}
-				c.UpdateAvatar(r, pay.Info.Avatar)
+				// This seems to lock up the entire app. Why?
+				/*
+					err = matrix.SetAvatarURL(pay.Info.Avatar)
+					if err != nil {
+						log.Println(err)
+						http.Error(w, err.Error(), 400)
+						return
+					}
+					c.UpdateAvatar(r, pay.Info.Avatar)
+				*/
 			}
 		}
 
