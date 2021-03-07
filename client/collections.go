@@ -1,6 +1,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"hummingbard/gomatrix"
 	"log"
@@ -52,16 +53,33 @@ func (c *Client) UserCollections(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//check if @user exists
+	{
+		var room string
+		//build full room path
+		//if path starts with @ then it's a user timeline, otherwise room
+		p := pathItems.Items
+		room = fmt.Sprintf(`#%s:%s`, p[0], c.Config.Client.Domain)
+		if fed {
+			room = fmt.Sprintf(`#%s:%s`, use.LocalPart, use.ServerName)
+		}
+
+		//check if room exists
+		_, err = cli.ResolveAlias(room)
+		if err != nil {
+			log.Println(err)
+			c.NotFound(w, r)
+			return
+		}
+	}
+
 	var room string
 
-	//build full room path
-	//if path starts with @ then it's a user timeline, otherwise room
 	room = fmt.Sprintf(`#%s:%s`, path, c.Config.Client.Domain)
 	if fed {
 		room = fmt.Sprintf(`#%s:%s`, use.LocalPart, use.ServerName)
 	}
 
-	//check if room exists
 	var ra *gomatrix.RespAliasResolve
 
 	ra, err = cli.ResolveAlias(room)
@@ -73,7 +91,6 @@ func (c *Client) UserCollections(w http.ResponseWriter, r *http.Request) {
 
 	if ra != nil && len(ra.RoomID) > 0 {
 		roomID = string(ra.RoomID)
-
 	}
 
 	// Default account should join this room
@@ -98,6 +115,12 @@ func (c *Client) UserCollections(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			log.Println(err)
+		}
+
+		if spaces != nil && len(spaces.Events) > 0 {
+			for _, space := range spaces.Events {
+				log.Println(space)
+			}
 		}
 
 		if spaces != nil {
@@ -397,4 +420,336 @@ func (c *Client) UserCollectionsItem(w http.ResponseWriter, r *http.Request) {
 	t.Nonce = nonce
 
 	c.Templates.ExecuteTemplate(w, "collections", t)
+}
+
+func (c *Client) CreateCollection() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		token := r.Header.Get("Authorization")
+
+		user, err := c.GetTokenUser(token)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		type payload struct {
+			Name        string `json:"name"`
+			Path        string `json:"path"`
+			Description string `json:"description"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+		err = json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
+		type Response struct {
+			Created    bool        `json:"created"`
+			Collection interface{} `json:"collection"`
+		}
+
+		ff := Response{Created: false}
+
+		matrix, err := c.TempMatrixClient(user.UserID, user.MatrixAccessToken)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		//check if #@user_collections parent space exists, if not create it
+		localPart := GetLocalPart(user.UserID)
+		canon := fmt.Sprintf(`#@%s_%s:%s`, localPart, "collections", c.Config.Client.Domain)
+		if user.Federated {
+			canon = fmt.Sprintf(`#@%s_%s:%s`, localPart, "collections", user.HomeServer)
+		}
+
+		log.Println("canon is ", canon)
+		log.Println("canon is ", canon)
+		log.Println("canon is ", canon)
+
+		av, err := matrix.ResolveAlias(canon)
+
+		log.Println("does it exist", av)
+		log.Println("does it exist", av)
+		log.Println("does it exist", av)
+		log.Println("does it exist", av)
+
+		roomID := ""
+
+		if av != nil {
+			roomID = string(av.RoomID)
+		}
+
+		if av == nil {
+
+			pl := gomatrix.Event{
+				Type: "m.room.power_levels",
+				Content: map[string]interface{}{
+					"ban": 50,
+					"events": map[string]interface{}{
+						"m.room.name":         100,
+						"m.room.power_levels": 100,
+					},
+					"events_default": 0,
+					"invite":         50,
+					"kick":           50,
+					"notifications": map[string]interface{}{
+						"room": 20,
+					},
+					"redact":        50,
+					"state_default": 50,
+					"users": map[string]interface{}{
+						user.UserID:          100,
+						c.DefaultUser.UserID: 100,
+					},
+					"users_default": 0,
+				},
+			}
+
+			initState := []gomatrix.Event{
+				gomatrix.Event{
+					Type: "m.room.history_visibility",
+					Content: map[string]interface{}{
+						"history_visibility": "world_readable",
+					},
+				}, gomatrix.Event{
+					Type: "m.room.guest_access",
+					Content: map[string]interface{}{
+						"guest_access": "can_join",
+					},
+				}, gomatrix.Event{
+					Type: "com.hummingbard.room",
+					Content: map[string]interface{}{
+						"room_type": "collection",
+					},
+				}, gomatrix.Event{
+					Type: "m.room.type",
+					Content: map[string]interface{}{
+						"type": "m.space",
+					},
+				}, gomatrix.Event{
+					Type:     fmt.Sprintf(`%s.parent`, c.Config.Spaces.Prefix),
+					StateKey: &user.RoomID,
+					Content: map[string]interface{}{
+						"via": []string{c.Config.Client.Domain},
+					},
+				},
+				pl,
+			}
+
+			localPart := GetLocalPart(user.UserID)
+			alias := fmt.Sprintf(`@%s_%s`, localPart, "collections")
+
+			req := &gomatrix.ReqCreateRoom{
+				Preset:        "public_chat",
+				Visibility:    "public",
+				RoomAliasName: alias,
+				Name:          fmt.Sprintf(`%s's Collections`, localPart),
+				Topic:         fmt.Sprintf(`%s's Collections`, localPart),
+				CreationContent: map[string]interface{}{
+					"m.federate": true,
+				},
+				InitialState: initState,
+			}
+
+			crr, err := matrix.CreateRoom(req)
+
+			if err != nil || crr == nil {
+				log.Println(err)
+				log.Println(err)
+				http.Error(w, err.Error(), 400)
+				return
+			}
+			if crr != nil {
+				roomID = crr.RoomID
+				c.OperatorJoinRoom(crr.RoomID)
+			}
+		}
+		pl := gomatrix.Event{
+			Type: "m.room.power_levels",
+			Content: map[string]interface{}{
+				"ban": 50,
+				"events": map[string]interface{}{
+					"m.room.name":         100,
+					"m.room.power_levels": 100,
+				},
+				"events_default": 0,
+				"invite":         50,
+				"kick":           50,
+				"notifications": map[string]interface{}{
+					"room": 20,
+				},
+				"redact":        50,
+				"state_default": 50,
+				"users": map[string]interface{}{
+					user.UserID:          100,
+					c.DefaultUser.UserID: 100,
+				},
+				"users_default": 0,
+			},
+		}
+
+		alias := fmt.Sprintf(`@%s_%s_%s`, localPart, "collections", strings.ToLower(pay.Path))
+
+		canon = fmt.Sprintf(`#%s:%s`, alias, user.HomeServer)
+
+		initState := []gomatrix.Event{
+			gomatrix.Event{
+				Type: "m.room.history_visibility",
+				Content: map[string]interface{}{
+					"history_visibility": "world_readable",
+				},
+			}, gomatrix.Event{
+				Type: "m.room.guest_access",
+				Content: map[string]interface{}{
+					"guest_access": "can_join",
+				},
+			}, gomatrix.Event{
+				Type: "com.hummingbard.room",
+				Content: map[string]interface{}{
+					"room_type": "collection",
+				},
+			}, gomatrix.Event{
+				Type: "m.room.type",
+				Content: map[string]interface{}{
+					"type": "m.space",
+				},
+			}, gomatrix.Event{
+				Type:     fmt.Sprintf(`%s.parent`, c.Config.Spaces.Prefix),
+				StateKey: &roomID,
+				Content: map[string]interface{}{
+					"via":             []string{c.Config.Client.Domain},
+					"name":            pay.Name,
+					"description":     pay.Description,
+					"canonical_alias": canon,
+					"stripped":        strings.ToLower(pay.Path),
+				},
+			},
+			pl,
+		}
+
+		req := &gomatrix.ReqCreateRoom{
+			Preset:        "public_chat",
+			Visibility:    "public",
+			RoomAliasName: alias,
+			Name:          pay.Name,
+			Topic:         pay.Description,
+			CreationContent: map[string]interface{}{
+				"m.federate": true,
+			},
+			InitialState: initState,
+		}
+
+		crr, err := matrix.CreateRoom(req)
+
+		if err != nil || crr == nil {
+			log.Println(err)
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		if crr != nil {
+			roomID = crr.RoomID
+			c.OperatorJoinRoom(crr.RoomID)
+
+			ff.Created = true
+		}
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	}
+}
+
+func (c *Client) CollectionAvailable() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("Authorization")
+
+		user, err := c.GetTokenUser(token)
+		if err != nil || user == nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		type payload struct {
+			Name string `json:"name"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			log.Println(err)
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+		err = json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
+		type Response struct {
+			Available bool `json:"available"`
+		}
+		ff := Response{Available: false}
+
+		matrix, err := c.TempMatrixClient(user.UserID, user.MatrixAccessToken)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		username := strings.ToLower(pay.Name)
+		username = strings.ReplaceAll(username, " ", "")
+
+		localPart := GetLocalPart(user.UserID)
+
+		canon := fmt.Sprintf(`#@%s_%s_%s:%s`, localPart, "collections", username, c.Config.Client.Domain)
+
+		if user.Federated {
+			canon = fmt.Sprintf(`#@%s_%s_%s:%s`, localPart, "collections", username, user.HomeServer)
+		}
+
+		log.Println("canon is ", canon)
+		log.Println("canon is ", canon)
+		log.Println("canon is ", canon)
+
+		av, err := matrix.ResolveAlias(canon)
+
+		if av == nil {
+			ff.Available = true
+		}
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	}
 }

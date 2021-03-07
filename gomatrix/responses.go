@@ -124,8 +124,8 @@ type RespUserStatus struct {
 }
 
 type RespProfile struct {
-		Displayname *string `json:"displayname"`
-		AvatarURL   *string `json:"avatar_url"`
+	Displayname *string `json:"displayname"`
+	AvatarURL   *string `json:"avatar_url"`
 }
 
 // RespRegister is the JSON response for http://matrix.org/docs/spec/client_server/r0.2.0.html#post-matrix-client-r0-register
@@ -225,4 +225,8 @@ type RespAliasResolve struct {
 
 type RespRegisterAvailable struct {
 	Available bool `json:"available"`
+}
+
+type RespDeactivate struct {
+	IDServerUnbindSuccess bool `json:"id_server_unbind_success"`
 }

@@ -27,10 +27,12 @@ type PathItem struct {
 }
 
 type ChildRoom struct {
-	RoomID   string       `json:"room_id"`
-	Alias    string       `json:"alias"`
-	Path     string       `json:"path"`
-	Children []*ChildRoom `json:"children"`
+	RoomID      string       `json:"room_id"`
+	Alias       string       `json:"alias"`
+	Path        string       `json:"path"`
+	Children    []*ChildRoom `json:"children"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
 }
 
 type Room struct {
@@ -105,6 +107,12 @@ func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, 
 			if stripped, ok := child.Content["stripped"].(string); ok {
 				y.Alias = stripped
 			}
+			if name, ok := child.Content["name"].(string); ok {
+				y.Name = name
+			}
+			if description, ok := child.Content["description"].(string); ok {
+				y.Description = description
+			}
 			rooms = append(rooms, &y)
 		}
 	}
@@ -135,11 +143,18 @@ func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, 
 				if stripped, ok := child.Content["stripped"].(string); ok {
 					y.Alias = stripped
 				}
+				if name, ok := child.Content["name"].(string); ok {
+					y.Name = name
+				}
+				if description, ok := child.Content["description"].(string); ok {
+					y.Description = description
+				}
 				y.Children = findChildren(child.RoomID)
 
 				r = append(r, &y)
 			}
 		}
+		sort.Slice(r, func(i, j int) bool { return r[i].Path < r[j].Path })
 		return r
 	}
 

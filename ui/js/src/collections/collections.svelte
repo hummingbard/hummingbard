@@ -26,13 +26,14 @@ function killAdd() {
 
 <div class="flex flex-column">
 
-{#if adding}
+
+{#if adding && owner}
     <AddCollection on:kill={killAdd}/>
 {/if}
 
 {#if exists}
 
-    {#if !adding}
+    {#if !adding && owner}
     <div class="brd-btm pa3">
         <button class="" on:click={add}>Add a collection</button>
     </div>
@@ -40,9 +41,16 @@ function killAdd() {
 
     <div class="flex flex-column flex-one">
         {#each $storeCollections as collection (collection.id)}
-            <div class="mb3">
-                {JSON.stringify(collection)}
+            <a href="/{collection.path}">
+            <div class="mb3 pa3 flex flex-column brd-btm">
+                <div class="">
+                    <strong>{collection.name}</strong>
+                </div>
+                <div class="mt3 fs-09">
+                    {collection.description}
+                </div>
             </div>
+            </a>
         {/each}
     </div>
 

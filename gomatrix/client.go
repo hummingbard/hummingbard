@@ -1020,6 +1020,29 @@ func (cli *Client) RegisterAvailable(req *ReqRegisterAvailable) (resp *RespRegis
 	return
 }
 
+func (cli *Client) DeactivateInitiate() (resp *RespUserInteractive, err error) {
+	urlPath := cli.BuildURL("account", "deactivate")
+	err = cli.MakeRequest("POST", urlPath, nil, &resp)
+	if err != nil {
+		httpErr, ok := err.(HTTPError)
+		if !ok { // network error
+			return
+		}
+		if httpErr.Code == 401 {
+			// body should be RespUserInteractive, if it isn't, fail with the error
+			err = json.Unmarshal(httpErr.Contents, &resp)
+			return
+		}
+	}
+	return
+}
+
+func (cli *Client) Deactivate(req interface{}) (resp *RespDeactivate, err error) {
+	urlPath := cli.BuildURL("account", "deactivate")
+	err = cli.MakeRequest("POST", urlPath, req, &resp)
+	return
+}
+
 // NewClient creates a new Matrix Client ready for syncing
 func NewClient(homeserverURL, userID, accessToken string) (*Client, error) {
 	hsURL, err := url.Parse(homeserverURL)

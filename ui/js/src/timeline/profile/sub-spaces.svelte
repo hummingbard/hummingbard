@@ -6,8 +6,6 @@ function switchToSpace() {
         return
     } else{
         if(window.timeline?.federated) {
-            window.location.href = `${window.location.href}/${window.timeline?.room_path}/${selected}`
-        } else {
             window.location.href = `${window.location.href}/${selected}`
         }
     }

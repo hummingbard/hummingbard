@@ -5,17 +5,20 @@ import { writable, derived } from 'svelte/store';
   const storeCollections = writable(collections);
 
   let initializeCollections = () => {
-    if(window.timeline?.collections) {
-      window.timeline.collections.forEach(collection => {
-        collection.hydrated = true
-        collections.push(collection)
-      })
-    }
+    console.log("collections is", collections)
+    storeCollections.update(p => {
+      if(window.timeline?.collections) {
+        console.log("adding collections")
+        window.timeline.collections.forEach(collection => {
+          p.push(collection)
+        })
+      }
+      return p
+    })
   }
 
 
   let addCollection = (collection) => {
-    console.log("adding", collection)
     storeCollections.update(p => {
       p.push(collection)
       return p

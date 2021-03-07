@@ -106,6 +106,7 @@ func routes(c *Client) chi.Router {
 	})
 
 	r.Route("/settings", func(r chi.Router) {
+		r.Use(c.RequireAuthentication)
 		r.Use(secureMiddleware.Handler)
 		r.Get("/", c.Settings())
 	})
@@ -114,6 +115,20 @@ func routes(c *Client) chi.Router {
 		r.Use(secureMiddleware.Handler)
 		r.Post("/public", c.FetchPublicSpaces())
 		r.Post("/query", c.Queryspace())
+	})
+
+	// WIP
+	/*
+		r.Route("/collections", func(r chi.Router) {
+			r.Use(secureMiddleware.Handler)
+			r.Post("/create", c.CreateCollection())
+			r.Post("/available", c.CollectionAvailable())
+		})
+	*/
+
+	r.Route("/account", func(r chi.Router) {
+		r.Use(secureMiddleware.Handler)
+		r.Post("/delete", c.DeleteAccount())
 	})
 
 	r.Route("/room", func(r chi.Router) {

@@ -17,23 +17,24 @@
 
         <div class="container scrl">
         <div class="content-c brd-lr ">
-          <div class="con">
-              <div class="">
+          <div class="col-c ">
 
-
-                <div class="gr-default h-100">
-                  <div class="gr-center">
-                    TODO.
-                  </div>
-                </div>
-
-
+            <div class=" pa3 brd-btm flex" style="height:60px;">
+              <div class="gr-center">
+                <span class="small bold">Account Settings</span>
               </div>
+            </div>
+
+            <div class="settings gr-default">
+              <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
+            </div>
+
           </div>
 
 
         </div>
         {{template "state" .}}
+        <script defer nonce={{.Nonce}} src="{{ InsertJS "settings" }}"></script>
 
       </div>
       </div>
