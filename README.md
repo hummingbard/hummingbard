@@ -41,7 +41,7 @@ should not be necessary once upstream Dendrite implements threads fully.
 
 To run Hummingbard, you'll need:
 
-- [Dendrite fork](https://github.com/hummingbard/dendrite) configured and running
+- [Dendrite (master branch) ](https://github.com/matrix-org/dendrite) configured and running
 - redis (for session storage)
 - postgres (for various non-Matrix storage)
 - [goose](https://github.com/pressly/goose) for migrations
