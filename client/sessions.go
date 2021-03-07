@@ -25,19 +25,20 @@ type OwnedRoom struct {
 }
 
 type User struct {
-	DisplayName       string       `json:"display_name"`
-	AvatarURL         string       `json:"avatar_url"`
-	AccessToken       string       `json:"access_token"`
-	MatrixAccessToken string       `json:"matrix_access_token"`
-	DeviceID          string       `json:"device_id"`
-	HomeServer        string       `json:"home_server"`
-	UserID            string       `json:"user_id"`
-	RefreshToken      string       `json:"refresh_token"`
-	RoomID            string       `json:"room_id"`
-	JoinedRooms       []JoinedRoom `json:"joined_rooms"`
-	OwnedRooms        []JoinedRoom `json:"owned_rooms"`
-	WellKnown         string       `json:"well_known"`
-	Federated         bool         `json:"federated"`
+	DisplayName       string                    `json:"display_name"`
+	AvatarURL         string                    `json:"avatar_url"`
+	AccessToken       string                    `json:"access_token"`
+	MatrixAccessToken string                    `json:"matrix_access_token"`
+	DeviceID          string                    `json:"device_id"`
+	HomeServer        string                    `json:"home_server"`
+	UserID            string                    `json:"user_id"`
+	RefreshToken      string                    `json:"refresh_token"`
+	RoomID            string                    `json:"room_id"`
+	JoinedRooms       []JoinedRoom              `json:"joined_rooms"`
+	OwnedRooms        []JoinedRoom              `json:"owned_rooms"`
+	WellKnown         string                    `json:"well_known"`
+	Federated         bool                      `json:"federated"`
+	Preferences       *gomatrix.UserPreferences `json:"preferences"`
 }
 
 func NewSession(sec string) *sessions.CookieStore {
@@ -462,4 +463,62 @@ func (c *Client) GetUserJoinedRooms(matrix *gomatrix.Client) ([]JoinedRoom, erro
 	}
 	sort.Slice(rms, func(i, j int) bool { return rms[i].RoomAlias < rms[j].RoomAlias })
 	return rms, nil
+}
+
+func (c *Client) RefreshPreferences(r *http.Request) error {
+	s, err := c.Sessions.Get(r, c.Config.Client.CookieName)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	token, ok := s.Values["access_token"].(string)
+	if ok {
+		userid, err := c.Store.Get(token).Result()
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+		user, err := c.Store.Get(userid).Result()
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		var us User
+		err = json.Unmarshal([]byte(user), &us)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		matrix, err := c.TempMatrixClient(us.UserID, us.MatrixAccessToken)
+		if err != nil {
+			log.Println(err)
+			log.Println(err)
+			return err
+		}
+
+		prefs, err := matrix.GetAccountData(us.UserID)
+		if err != nil {
+			log.Println(err)
+		}
+
+		us.Preferences = prefs
+
+		serialized, err := json.Marshal(us)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+		err = c.Store.Set(userid, serialized, 0).Err()
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+
+	}
+
+	return nil
 }

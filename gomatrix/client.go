@@ -1037,6 +1037,23 @@ func (cli *Client) DeactivateInitiate() (resp *RespUserInteractive, err error) {
 	return
 }
 
+func (cli *Client) UpdateAccountData(userID string, req interface{}) (err error) {
+	urlPath := cli.BuildURL("user", userID, "account_data", "com.hummingbard.user.preferences")
+	err = cli.MakeRequest("PUT", urlPath, req, nil)
+	return
+}
+
+type UserPreferences struct {
+	DarkMode      bool `json:"dark_mode"`
+	ShowNSFWPosts bool `json:"show_nsfw_posts"`
+}
+
+func (cli *Client) GetAccountData(userID string) (resp *UserPreferences, err error) {
+	urlPath := cli.BuildURL("user", userID, "account_data", "com.hummingbard.user.preferences")
+	err = cli.MakeRequest("GET", urlPath, nil, &resp)
+	return
+}
+
 func (cli *Client) Deactivate(req interface{}) (resp *RespDeactivate, err error) {
 	urlPath := cli.BuildURL("account", "deactivate")
 	err = cli.MakeRequest("POST", urlPath, req, &resp)

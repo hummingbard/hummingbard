@@ -382,6 +382,10 @@ function cancel() {
     border-radius: 4px;
   }
 
+input, textarea {
+  width: 100%;
+}
+
 @media screen and (max-width: 538px) {
   .cr {
     min-width: 100%;

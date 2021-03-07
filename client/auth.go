@@ -247,6 +247,11 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 			log.Println(err)
 		}
 
+		prefs, err := matrix.GetAccountData(resp.UserID)
+		if err != nil {
+			log.Println(err)
+		}
+
 		// store user session
 		token := RandomString(64)
 
@@ -259,6 +264,7 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 			JoinedRooms:       rms,
 			WellKnown:         serverName,
 			Federated:         fu,
+			Preferences:       prefs,
 		}
 
 		if profile != nil {

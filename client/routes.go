@@ -127,7 +127,9 @@ func routes(c *Client) chi.Router {
 	*/
 
 	r.Route("/account", func(r chi.Router) {
+		r.Use(c.RequireAuthentication)
 		r.Use(secureMiddleware.Handler)
+		r.Post("/preferences/update", c.UpdatePreferences())
 		r.Post("/delete", c.DeleteAccount())
 	})
 

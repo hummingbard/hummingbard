@@ -33,3 +33,12 @@ if(sttp && header) {
   observer.observe(header)
 }
 
+let dm = document.querySelector('.dark-mode')
+if(dm) {
+  import('./dark-mode/dark-mode.svelte').then(res => {
+      new res.default({
+          target: dm,
+          hydrate: true
+      });
+  })
+}

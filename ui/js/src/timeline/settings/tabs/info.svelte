@@ -59,3 +59,11 @@ $: about = window.timeline?.profile ? `About you` : `About this community`
   </div>
 
 </div>
+
+<style>
+
+input, textarea {
+  width: 100%;
+}
+
+</style>

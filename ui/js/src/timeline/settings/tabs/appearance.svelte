@@ -50,4 +50,8 @@ function removeHeader(e) {
 </div>
 
 <style>
+
+input, textarea {
+  width: 100%;
+}
 </style>

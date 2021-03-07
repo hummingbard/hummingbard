@@ -316,4 +316,9 @@ function updated(e) {
     top: 0;
     height: 100%;
 }
+
+input, textarea {
+  width: 100%;
+}
+
 </style>

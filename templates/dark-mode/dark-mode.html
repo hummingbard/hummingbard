@@ -1,0 +1,14 @@
+{{define "dark-mode"}}
+<script nonce={{.Nonce}}>
+  let isDark = localStorage.getItem('dark_mode')
+  if(isDark && isDark == 'true') {
+    document.documentElement.classList.add('dark')
+  }
+  {{if .LoggedInUser}}
+    {{if .LoggedInUser.Preferences.DarkMode}}
+      document.documentElement.classList.add('dark')
+    {{end}}
+  {{end}}
+</script>
+{{end}}
+

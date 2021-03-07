@@ -5,6 +5,7 @@
     {{template "common-head" .}}
   </head>
   <body>
+    {{template "dark-mode" Map "Nonce" .Nonce "LoggedInUser" .LoggedInUser}}
     <div class="root">
       {{template "header" Map "Page" . "Name" "error"}}
 

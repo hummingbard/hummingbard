@@ -98,3 +98,9 @@ function updateDetails(e) {
   </div>
 
 </div>
+<style>
+
+input, textarea {
+  width: 100%;
+}
+</style>
