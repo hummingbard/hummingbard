@@ -3,7 +3,7 @@
 let darkMode = localStorage.getItem("dark_mode");
 let prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
-let isDark = (darkMode == 'true') || (prefDark && darkMode != 'false')
+let isDark = (darkMode == 'true') || (prefDark && (!darkMode || darkMode != 'false'))
 
 function toggle() {
   if(!isDark) {

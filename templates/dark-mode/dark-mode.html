@@ -2,7 +2,7 @@
 <script nonce={{.Nonce}}>
   let isDark = localStorage.getItem('dark_mode')
   let prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  if((isDark && isDark == 'true') || (prefDark && (isDark && isDark != 'false'))) {
+  if((isDark && isDark == 'true') || (prefDark && (!isDark || isDark != 'false'))) {
     document.documentElement.classList.add('dark')
   }
   {{if .LoggedInUser}}
