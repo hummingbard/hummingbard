@@ -264,7 +264,10 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 			JoinedRooms:       rms,
 			WellKnown:         serverName,
 			Federated:         fu,
-			Preferences:       *prefs,
+		}
+
+		if prefs != nil {
+			u.Preferences = *prefs
 		}
 
 		if profile != nil {
