@@ -1,22 +1,24 @@
 <script>
 
 let darkMode = localStorage.getItem("dark_mode");
+let prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
-$: isDark = darkMode == 'true'
+let isDark = (darkMode == 'true') || (prefDark && darkMode != 'false')
 
 function toggle() {
   if(!isDark) {
     localStorage.setItem("dark_mode", "true");
-    darkMode = "true"
+    isDark = true
     document.documentElement.classList.add('dark')
   } else {
     localStorage.setItem("dark_mode", "false");
-    darkMode = "false"
+    isDark = false
     document.documentElement.classList.remove('dark')
   }
 }
 
 </script>
+
 
 <div class="" on:click={toggle}>
 {#if isDark}
