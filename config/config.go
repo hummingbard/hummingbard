@@ -40,6 +40,12 @@ type Spaces struct {
 	Prefix string `toml:"prefix"`
 }
 
+type Auth struct {
+	DisableRegistration    bool `toml:"disable_registration"`
+	DisableFederatedLogin  bool `toml:"disable_federated_login"`
+	DisableProfileCreation bool `toml:"disable_profile_creation"`
+}
+
 type Config struct {
 	Name       string `toml:"name"`
 	Mode       string `toml:"mode"`
@@ -49,6 +55,7 @@ type Config struct {
 	Redis      Redis  `toml:"redis"`
 	YoutubeKey string `toml:"youtube_key"`
 	Spaces     Spaces `toml:"spaces"`
+	Auth       Auth   `toml:"auth"`
 }
 
 var conf Config

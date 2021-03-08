@@ -119,7 +119,7 @@ function explore() {
 .nav {
   position :fixed;
   width: 300px;
-  background: var(--primary-light-gray);
+  background: var(--primary-lightestest-gray);
   top: 0;
   bottom: 0;
   left: 0;

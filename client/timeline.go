@@ -692,11 +692,18 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 	//build full room path
 	//if path starts with @ then it's a user timeline, otherwise room
 	if path[0] == '@' {
+		p := pathItems.Items
+		if p[len(p)-1][0] == '$' {
+			p = p[:len(p)-1]
+		}
+		path = strings.Join(p, "_")
+
 		room = fmt.Sprintf(`#%s:%s`, path, c.Config.Client.Domain)
 		if fed {
 			room = fmt.Sprintf(`#%s:%s`, use.LocalPart, use.ServerName)
 		}
 		profileRoom = true
+
 	} else {
 		sp := strings.Split(path, "/")
 		pth := strings.Join(sp, "_")

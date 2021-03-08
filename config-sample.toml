@@ -4,7 +4,7 @@ mode = "development"
 
 [client]
 domain = "hummingbard.com"
-port = 8999
+port = ":8999"
 cookie_name = "hummingbard"
 secure_cookie = "something_random"
 
@@ -28,3 +28,8 @@ db = 1
 
 [spaces]
 prefix = "org.matrix.msc1772.space"
+
+[auth]
+disable_registration = false
+disable_federated_login = false
+disable_profile_creation = false

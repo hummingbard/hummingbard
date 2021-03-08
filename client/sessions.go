@@ -499,7 +499,7 @@ func (c *Client) RefreshPreferences(r *http.Request) error {
 			return err
 		}
 
-		prefs, err := matrix.GetAccountData(us.UserID)
+		prefs, err := matrix.GetAccountPreferences(us.UserID)
 		if err != nil {
 			log.Println(err)
 		}

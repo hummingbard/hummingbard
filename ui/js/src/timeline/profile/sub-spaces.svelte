@@ -5,9 +5,7 @@ function switchToSpace() {
     if(selected == '') {
         return
     } else{
-        if(window.timeline?.federated) {
-            window.location.href = `${window.location.href}/${selected}`
-        }
+        window.location.href = `${window.location.href}/${selected}`
     }
 }
 

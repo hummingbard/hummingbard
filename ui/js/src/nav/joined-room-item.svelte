@@ -122,7 +122,6 @@ function leaveRoom() {
 </div>
 <style>
 .room-item {
-    transition: 0.05s;
     border-radius: 500px;
 }
 .room-item:hover {
@@ -139,7 +138,6 @@ function leaveRoom() {
 }
 .jr-m {
     opacity: 0;
-    transition: 0.05s;
 }
 .jr-h {
     opacity: 1;

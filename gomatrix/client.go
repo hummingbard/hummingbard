@@ -1037,7 +1037,19 @@ func (cli *Client) DeactivateInitiate() (resp *RespUserInteractive, err error) {
 	return
 }
 
-func (cli *Client) UpdateAccountData(userID string, req interface{}) (err error) {
+func (cli *Client) UpdateAccountData(userID, data string, req interface{}) (err error) {
+	urlPath := cli.BuildURL("user", userID, "account_data", data)
+	err = cli.MakeRequest("PUT", urlPath, req, nil)
+	return
+}
+
+func (cli *Client) GetAccountData(userID, data string) (resp *UserPreferences, err error) {
+	urlPath := cli.BuildURL("user", userID, "account_data", data)
+	err = cli.MakeRequest("GET", urlPath, nil, &resp)
+	return
+}
+
+func (cli *Client) UpdateAccountPreferences(userID string, req interface{}) (err error) {
 	urlPath := cli.BuildURL("user", userID, "account_data", "com.hummingbard.user.preferences")
 	err = cli.MakeRequest("PUT", urlPath, req, nil)
 	return
@@ -1048,7 +1060,7 @@ type UserPreferences struct {
 	ShowNSFWPosts bool `json:"show_nsfw_posts"`
 }
 
-func (cli *Client) GetAccountData(userID string) (resp *UserPreferences, err error) {
+func (cli *Client) GetAccountPreferences(userID string) (resp *UserPreferences, err error) {
 	urlPath := cli.BuildURL("user", userID, "account_data", "com.hummingbard.user.preferences")
 	err = cli.MakeRequest("GET", urlPath, nil, &resp)
 	return

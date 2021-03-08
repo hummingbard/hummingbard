@@ -247,7 +247,7 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 			log.Println(err)
 		}
 
-		prefs, err := matrix.GetAccountData(resp.UserID)
+		prefs, err := matrix.GetAccountPreferences(resp.UserID)
 		if err != nil {
 			log.Println(err)
 		}
@@ -278,12 +278,6 @@ func (c *Client) ValidateLogin() http.HandlerFunc {
 				u.AvatarURL = StripMXCPrefix(*profile.AvatarURL)
 			}
 		}
-
-		log.Println("what is res???", res)
-		log.Println("what is res???", res)
-		log.Println("what is res???", res)
-		log.Println("what is res???", res)
-		log.Println("what is res???", res)
 
 		if res != nil && res.RoomID != "" {
 			u.RoomID = string(res.RoomID)

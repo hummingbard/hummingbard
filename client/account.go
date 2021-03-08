@@ -49,7 +49,7 @@ func (c *Client) UpdatePreferences() http.HandlerFunc {
 		}
 		res := Response{}
 
-		err = matrix.UpdateAccountData(user.UserID, pay)
+		err = matrix.UpdateAccountPreferences(user.UserID, pay)
 		if err != nil {
 			log.Println(err)
 		} else {
