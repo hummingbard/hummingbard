@@ -5,9 +5,11 @@
     document.documentElement.classList.add('dark')
   }
   {{if .LoggedInUser}}
+  {{if .LoggedInUser.Preferences}}
     {{if .LoggedInUser.Preferences.DarkMode}}
       document.documentElement.classList.add('dark')
     {{end}}
+  {{end}}
   {{end}}
 </script>
 {{end}}

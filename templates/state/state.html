@@ -16,10 +16,12 @@
           room_id: {{.LoggedInUser.RoomID}},
           federated: {{.LoggedInUser.Federated}},
           joined_rooms: {{.LoggedInUser.JoinedRooms}},
+          {{if .LoggedInUser.Preferences}}
           preferences: {
             dark_mode: {{.LoggedInUser.Preferences.DarkMode}},
             show_nsfw_posts: {{.LoggedInUser.Preferences.ShowNSFWPosts}},
           }
+          {{end}}
         }
     {{end}}
   </script>
