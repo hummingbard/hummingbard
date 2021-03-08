@@ -25,20 +25,20 @@ type OwnedRoom struct {
 }
 
 type User struct {
-	DisplayName       string                    `json:"display_name"`
-	AvatarURL         string                    `json:"avatar_url"`
-	AccessToken       string                    `json:"access_token"`
-	MatrixAccessToken string                    `json:"matrix_access_token"`
-	DeviceID          string                    `json:"device_id"`
-	HomeServer        string                    `json:"home_server"`
-	UserID            string                    `json:"user_id"`
-	RefreshToken      string                    `json:"refresh_token"`
-	RoomID            string                    `json:"room_id"`
-	JoinedRooms       []JoinedRoom              `json:"joined_rooms"`
-	OwnedRooms        []JoinedRoom              `json:"owned_rooms"`
-	WellKnown         string                    `json:"well_known"`
-	Federated         bool                      `json:"federated"`
-	Preferences       *gomatrix.UserPreferences `json:"preferences"`
+	DisplayName       string                   `json:"display_name"`
+	AvatarURL         string                   `json:"avatar_url"`
+	AccessToken       string                   `json:"access_token"`
+	MatrixAccessToken string                   `json:"matrix_access_token"`
+	DeviceID          string                   `json:"device_id"`
+	HomeServer        string                   `json:"home_server"`
+	UserID            string                   `json:"user_id"`
+	RefreshToken      string                   `json:"refresh_token"`
+	RoomID            string                   `json:"room_id"`
+	JoinedRooms       []JoinedRoom             `json:"joined_rooms"`
+	OwnedRooms        []JoinedRoom             `json:"owned_rooms"`
+	WellKnown         string                   `json:"well_known"`
+	Federated         bool                     `json:"federated"`
+	Preferences       gomatrix.UserPreferences `json:"preferences"`
 }
 
 func NewSession(sec string) *sessions.CookieStore {
@@ -504,7 +504,7 @@ func (c *Client) RefreshPreferences(r *http.Request) error {
 			log.Println(err)
 		}
 
-		us.Preferences = prefs
+		us.Preferences = *prefs
 
 		serialized, err := json.Marshal(us)
 		if err != nil {
