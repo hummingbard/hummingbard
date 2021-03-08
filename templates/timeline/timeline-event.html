@@ -36,6 +36,12 @@
 
 {{$nsfw := index .Event.Content "nsfw"}}
 
+{{if .LoggedInUser}}
+{{if .LoggedInUser.Preferences.ShowNSFWPosts}}
+{{$nsfw = false}}
+{{end}}
+{{end}}
+
 <div class="po-co flex flex-column{{if .Nested}} brd-tp brd-lr{{end}} {{if .NestedReply}}mt3 {{if $l}}ns-1{{end}}{{end}} {{if .Focus}}foc{{end}} {{if $nsfw}}relative{{end}}"
 id="{{.Event.ShortID}}">
 
@@ -374,7 +380,6 @@ id="{{.Event.ShortID}}">
       {{end}}
 
       </div>
-{{$nsfw := index .Event.Content "nsfw"}}
 
 {{if and $nsfw (not .PermalinkedPost)}}
     <div class="nsfw-mask gr-default nsfw brd-btm" 

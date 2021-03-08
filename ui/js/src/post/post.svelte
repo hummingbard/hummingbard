@@ -176,7 +176,7 @@ $: loadMore = post?.replies?.length < children
 
 
 
-$: nsfw = post.content?.nsfw || false
+$: nsfw = (post.content?.nsfw && !identity.preferences.show_nsfw_posts) || false
 
 let nsfwState = true;
 function nsfwOff() {
