@@ -52,7 +52,7 @@ body {
                     <div class="gr-default mr3">
                       <a class="gr-center" href="/{{$author.FormattedID}}" title="{{index $post.Sender}}">
                       {{if gt (len $author.AvatarURL) 0}}
-                          <div class="thumbnail{{if .Nested}}-s{{end}}">
+                          <div class="thumbnail">
                             <img src="{{$author.AvatarURL}}" />
                           </div>
                       {{else}}

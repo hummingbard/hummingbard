@@ -592,6 +592,7 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 			RefreshToken:      resp.RefreshToken,
 			JoinedRooms:       rms,
 			RoomID:            crr.RoomID,
+			WellKnown:         serverName,
 		}
 
 		serialized, err := json.Marshal(u)
