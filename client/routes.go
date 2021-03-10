@@ -100,10 +100,16 @@ func routes(c *Client) chi.Router {
 		r.Post("/fetch", c.GetFeedEvents())
 	})
 
-	r.Route("/public", func(r chi.Router) {
-		r.Use(secureMiddleware.Handler)
-		r.Get("/", c.PublicFeed())
-	})
+	if !c.Config.Privacy.DisablePublic {
+		r.Route("/public", func(r chi.Router) {
+			r.Use(secureMiddleware.Handler)
+			r.Get("/", c.PublicFeed())
+		})
+	} else {
+		r.Route("/public", func(r chi.Router) {
+			r.Get("/", c.NotFound)
+		})
+	}
 
 	r.Route("/settings", func(r chi.Router) {
 		r.Use(c.RequireAuthentication)

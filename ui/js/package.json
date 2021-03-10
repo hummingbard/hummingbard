@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
+    "hydrogen-web": "github:vector-im/hydrogen-web",
     "marked": "^2.0.0",
     "prosemirror-commands": "^1.1.5",
     "prosemirror-dropcursor": "^1.3.2",

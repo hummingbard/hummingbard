@@ -232,13 +232,23 @@ a:link, a:visited {
     color: var(--primary);
 }
 
-.post-tools {
+svg {
+  fill: var(--primary-dark);
   transition: 0.1s;
 }
 
+svg:hover {
+  fill: var(--primary-darkest);
+}
 
 .nstd {
   margin-left: 1rem;
+}
+
+.chat {
+  position: fixed;
+  bottom: 0;
+  right: 2rem;
 }
 
 .post-container {
@@ -747,6 +757,7 @@ select:focus{
 .fill-blue {
   fill: blue;
 }
+
 
 .fs-09 {
     font-size: 0.9rem;

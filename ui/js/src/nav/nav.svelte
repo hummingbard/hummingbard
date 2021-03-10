@@ -146,10 +146,10 @@ function explore() {
   background-color: var(--primary-gray);
 }
 
-    .hg:hover .hgg{
-        stroke-width: 3;
-        fill: blue;
-    }
+.hg:hover .hgg{
+    stroke-width: 3;
+    fill: red;
+}
 
 @media screen and (max-width: 768px) {
     .n {

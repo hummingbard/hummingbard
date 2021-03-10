@@ -45,6 +45,7 @@ To run Hummingbard, you'll need:
 - redis (for session storage)
 - postgres (for various non-Matrix storage)
 - [goose](https://github.com/pressly/goose) for migrations
+- uglifycss - `npm install uglifycss`
 
 ### Steps:
 

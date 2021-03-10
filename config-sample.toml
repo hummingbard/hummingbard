@@ -33,3 +33,6 @@ prefix = "org.matrix.msc1772.space"
 disable_registration = false
 disable_federated_login = false
 disable_profile_creation = false
+
+[privacy]
+disable_public = false

@@ -38,7 +38,7 @@ let build = (e) => {
             break
         }
 
-        const allowed = ["image/jpeg", "image/jpg", "image/webp", "image/png"]
+        const allowed = ["image/gif","image/jpeg", "image/jpg", "image/webp", "image/png"]
 
         const file = e.target.files[i]
 
@@ -102,7 +102,7 @@ let build = (e) => {
 
 <input 
     type="file" 
-    accept="image/jpeg, image/png, image/webp" 
+    accept="image/gif, image/jpeg, image/png, image/webp" 
     name="images"
     bind:this={imageInput} 
     on:change={build} 

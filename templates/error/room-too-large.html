@@ -5,6 +5,11 @@
     {{template "common-head" .}}
   </head>
   <body>
+    {{template "dark-mode" Map "Nonce" .Nonce "LoggedInUser" .LoggedInUser}}
+    <div class="base {{if .LoggedInUser}}base-l{{end}}">
+      {{if .LoggedInUser}}
+      {{template "nav" Map "Page" .}}
+      {{end}}
     <div class="root">
       {{template "header" Map "Page" . "Name" "error"}}
 
@@ -18,6 +23,7 @@
       {{template "state" .}}
       {{template "footer" .}}
 
+    </div>
     </div>
   </body>
 </html>

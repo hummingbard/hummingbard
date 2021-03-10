@@ -46,16 +46,21 @@ type Auth struct {
 	DisableProfileCreation bool `toml:"disable_profile_creation"`
 }
 
+type Privacy struct {
+	DisablePublic bool `toml:"disable_public"`
+}
+
 type Config struct {
-	Name       string `toml:"name"`
-	Mode       string `toml:"mode"`
-	Client     Client `toml:"client"`
-	Matrix     Matrix `toml:"matrix"`
-	DB         DB     `toml:"db"`
-	Redis      Redis  `toml:"redis"`
-	YoutubeKey string `toml:"youtube_key"`
-	Spaces     Spaces `toml:"spaces"`
-	Auth       Auth   `toml:"auth"`
+	Name       string  `toml:"name"`
+	Mode       string  `toml:"mode"`
+	Client     Client  `toml:"client"`
+	Matrix     Matrix  `toml:"matrix"`
+	DB         DB      `toml:"db"`
+	Redis      Redis   `toml:"redis"`
+	YoutubeKey string  `toml:"youtube_key"`
+	Spaces     Spaces  `toml:"spaces"`
+	Auth       Auth    `toml:"auth"`
+	Privacy    Privacy `toml:"privacy"`
 }
 
 var conf Config

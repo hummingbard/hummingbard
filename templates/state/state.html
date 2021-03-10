@@ -28,4 +28,11 @@
   {{if .LoggedInUser}}
       <script defer nonce={{.Nonce}} src="{{ InsertJS "userMenu" }}"></script>
   {{end}}
+
+{{if .LoggedInUser}}
+<div class="chat">
+  Chat
+</div>
+{{end}}
+
 {{end}}

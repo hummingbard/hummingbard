@@ -22,6 +22,7 @@ module.exports = {
     popup: './src/popup/popup',
     collections: './src/collections/collections',
     settings: './src/settings/settings',
+    chat: './src/chat/chat',
   },
   module: {
     rules: [

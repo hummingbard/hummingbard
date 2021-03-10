@@ -203,4 +203,8 @@ async function toggleSearch() {
     background: var(--primary-gray);
     border-radius: 500px;
 }
+
+input, textarea {
+width: 100%;
+}
 </style>

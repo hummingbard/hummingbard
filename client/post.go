@@ -383,7 +383,7 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 		}
 
 		//duplicate it in #public room if it isn't a thread reply
-		if !pay.Reply && !pay.Page {
+		if !pay.Reply && !pay.Page && !c.Config.Privacy.DisablePublic {
 
 			go func() {
 				npe.EventID = cre.EventID
