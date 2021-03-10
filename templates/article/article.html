@@ -183,7 +183,7 @@ body {
 
           <script nonce={{.Nonce}}>
             window.timeline = {
-              id: {{.Room.ID}},
+              room_id: {{.Room.ID}},
               permalink: {{.IsPermalink}},
               {{if .IsPermalink}}
               event_id: {{.Room.EventID}},
