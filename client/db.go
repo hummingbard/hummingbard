@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"hummingbard/config"
 	"log"
 	"regexp"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type DB struct {
@@ -19,15 +19,18 @@ type DB struct {
 }
 
 // NewDB returns a new database instace
-func NewDB() (*DB, error) {
+func NewDB(dbType string) (*DB, error) {
 
 	c, err := config.Read()
 	if err != nil {
 		panic(err)
 	}
-	conn := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=%s",
-		c.DB.Host, c.DB.Port, c.DB.User, c.DB.Password, c.DB.Name, c.DB.SSL)
+
+	conn := c.DB.Client
+
+	if dbType == "userapi_accounts" {
+		conn = c.DB.DendriteUserAPIAccounts
+	}
 
 	db, err := sqlx.Open("postgres", conn)
 	if err != nil {
@@ -171,4 +174,187 @@ func (c *Client) GetAllRooms(ctx context.Context) (map[string]string, error) {
 	}
 
 	return rooms, nil
+}
+
+func (c *Client) AddEmailVerification(ctx context.Context, email, token string) error {
+
+	_, err := c.DB.Exec(`INSERT INTO email_verification(email, token) VALUES($1, $2)`, email, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) AddInvite(ctx context.Context, user_id, email, token string) error {
+
+	_, err := c.DB.Exec(`INSERT INTO invites(invited_by, invitee_email, token) VALUES($1, $2, $3)`, user_id, email, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetEmailVerificationToken(ctx context.Context, code string) (string, bool, error) {
+	var email string
+	var valid bool
+	err := c.DB.QueryRow("select email, valid from email_verification where token=$1 and valid=true", code).Scan(&email, &valid)
+	if err != nil || err == sql.ErrNoRows {
+		log.Println(err)
+		return "", false, err
+	}
+	return email, valid, nil
+}
+
+func (c *Client) AddNewUser(ctx context.Context, user_id, email, token string) error {
+
+	_, err := c.DB.Exec(`INSERT INTO users(user_id, email, email_verified, access_token) VALUES($1, $2, true, $3)`, user_id, email, token)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.DB.Exec(`UPDATE email_verification set valid=false where email=$1`, email)
+	if err != nil {
+		return err
+	}
+	_, err = c.DB.Exec(`UPDATE invites set valid=false where invitee_email=$1`, email)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) VerifyEmail(ctx context.Context, email string) error {
+
+	_, err := c.DB.Exec(`UPDATE users set email_verified=true where email=$1`, email)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.DB.Exec(`UPDATE email_verification set valid=false where email=$1`, email)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) DoesUserExist(ctx context.Context, email string) (bool, error) {
+	var exists bool
+	err := c.DB.QueryRow("select exists(select 1 from users where email=$1)", email).Scan(&exists)
+	if err != nil || err == sql.ErrNoRows {
+		log.Println(err)
+		return true, err
+	}
+	return exists, nil
+}
+
+func (c *Client) DoesEmailExist(ctx context.Context, email, userID string) (bool, error) {
+	var exists bool
+	err := c.DB.QueryRow("select exists(select 1 from users where email=$1 and user_id!=$2)", email, userID).Scan(&exists)
+	if err != nil || err == sql.ErrNoRows {
+		log.Println(err)
+		return true, err
+	}
+	return exists, nil
+}
+
+func (c *Client) AddPasswordReset(ctx context.Context, email, token string) error {
+
+	_, err := c.DB.Exec(`INSERT INTO password_resets(email, token) VALUES($1, $2)`, email, token)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) GetPasswordResetToken(ctx context.Context, code string) (string, bool, error) {
+	var email string
+	var valid bool
+	err := c.DB.QueryRow("select email, valid from password_resets where token=$1 and valid=true", code).Scan(&email, &valid)
+	if err != nil || err == sql.ErrNoRows {
+		log.Println(err)
+		return "", false, err
+	}
+	return email, valid, nil
+}
+
+func (c *Client) InvalidatePasswordResetCode(ctx context.Context, email string) error {
+
+	_, err := c.DB.Exec(`UPDATE password_resets set valid=false where email=$1`, email)
+	log.Println(err)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *Client) GetUser(ctx context.Context, email string) (string, string, error) {
+	var user_id, token string
+	err := c.DB.QueryRow("select user_id, access_token from users where email=$1", email).Scan(&user_id, &token)
+	if err != nil || err == sql.ErrNoRows {
+		log.Println(err)
+		return "", "", err
+	}
+	return user_id, token, nil
+}
+
+func (c *Client) GetEmailFromUserID(ctx context.Context, id string) (string, bool, error) {
+	var user_id string
+	var verified bool
+	err := c.DB.QueryRow("select email, email_verified from users where user_id=$1", id).Scan(&user_id, &verified)
+	if err != nil || err == sql.ErrNoRows {
+		log.Println(err)
+		return "", false, err
+	}
+	return user_id, verified, nil
+}
+
+func (c *Client) UnsafePasswordReset(ctx context.Context, username, password string) error {
+
+	hashBytes, err := bcrypt.GenerateFromPassword([]byte(password), 11)
+	if err != nil {
+		return err
+	}
+
+	hash := string(hashBytes)
+
+	_, err = c.UserAPIAccountsDB.Exec(`UPDATE account_accounts set password_hash=$1 where localpart=$2`, hash, username)
+	log.Println(err)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UnsafeAddEmail(ctx context.Context, username, email string) error {
+
+	_, err := c.UserAPIAccountsDB.Exec(`INSERT into account_threepid(threepid, medium, localpart) VALUES($1, $2, $3)`, email, "email", username)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UpdateEmail(ctx context.Context, userId, email string) error {
+
+	_, err := c.DB.Exec(`UPDATE users SET email=$1, email_verified=false where user_id=$2`, email, userId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) UnsafeUpdateEmail(ctx context.Context, username, email string) error {
+
+	_, err := c.UserAPIAccountsDB.Exec(`UPDATE account_threepid SET threepid=$1 where localpart=$2`, email, username)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

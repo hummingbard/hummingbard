@@ -33,7 +33,7 @@ func (c *Client) CreateRoom() http.HandlerFunc {
 	}
 }
 
-func (c *Client) UsernameAvailable() http.HandlerFunc {
+func (c *Client) SpaceUsernameAvailable() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("Authorization")
 

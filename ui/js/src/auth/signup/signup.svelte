@@ -1,22 +1,35 @@
 <script>
-import {onMount} from 'svelte'
-import { focusCaret } from '../../utils/utils.js'
+import {tick, onMount} from 'svelte'
+import { debounce } from '../../utils/utils.js'
 
 onMount(() => {
   if(signupError) {
     passwordInput.focus()
   }
-  focusCaret(usernameInput)
+  focusPassword()
 })
+
+async function focusPassword() {
+  await tick();
+  usernameInput.focus()
+}
+
 let federated = false;
 
+let emailInput;
 let usernameInput;
 let passwordInput;
 let repeatPasswordInput;
 
 let loggingIn;
 
-function signUp() {
+function signUp(e) {
+  e.preventDefault()
+  if(usernameInput.value.length < 3) {
+    alert("That username is too short.")
+    usernameInput.focus()
+    return
+  }
   if(passwordInput.value.length == 0) {
     passwordInput.focus()
     return
@@ -39,8 +52,76 @@ function toggleFederated() {
 $: usernamePlaceholder = federated ? `@username:server.org` : `username`
 $: tooltip = !federated ? `Sign up on` : `Log in with a Hummingbard account`
 
-$: inte = window.interactive || false
 $: home = window.homeServer || ""
+
+
+let username = '';
+let checking = false;
+let available = false;
+let usernameAvailable = true;
+
+function updateUsername(e) {
+  const letters = /^[0-9a-zA-Z-]+$/;
+  if(!e.key.match(letters)){
+    e.preventDefault()
+  }
+  usernameAvailable = true
+  available = false
+  if(username.length === 0) {
+      checking = false
+      return
+  }
+}
+
+function resetUsername() {
+  usernameInput.value = ''
+  username = ''
+  available = false;
+  usernameAvailable = true;
+  usernameInput.focus()
+}
+
+
+async function checkUsername() {
+    let endpoint = `/username/available`
+    let data = {
+        username: username,
+    };
+    let resp = await fetch(endpoint, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify(data),
+        headers:{
+            'Content-Type': 'application/json'
+        }
+    })
+    const ret = await resp.json()
+    return Promise.resolve(ret)
+}
+function reset() {
+  available = false
+  debounce(() =>{
+    checking = true
+    if(usernameInput.value.length < 3) {
+      checking = false
+      usernameAvailable = true
+      available = false
+      return
+    }
+    checkUsername().then((res) => {
+      console.log(res)
+        if(res?.available) {
+          usernameAvailable = true
+          available = true
+        } else if(!res?.available) {
+          usernameAvailable = false
+          available = false
+        }
+        checking = false
+    }).then(() => {
+    })
+
+  }, 500, this)
+}
 
 </script>
 
@@ -53,31 +134,56 @@ $: home = window.homeServer || ""
  method="POST" 
  autocomplete="off">
       <div class="flex flex-column">
-        {#if federated}
-        <div class="mb3 fs-09 lh-copy">
-          Sign up on another matrix<br> server.
+      {#if signupDisabled}
+        <div class="mb3 warn">
+          Signing up is disabled.
         </div>
-        {/if}
-        {#if inte  && home}
-          <div class="mb3 fs-09 lh-copy">
-            The server <span class="primary">{homeServer}</span> requires
-            additional steps to register accounts. Please register elsewhere.
+      {/if}
+
+            <input class="" type="text"
+            bind:this={emailInput} 
+            name="email"
+            value={signupEmail} readonly>
+
+            <input name="federated" type=checkbox bind:checked={federated}
+                   disabled={signupDisabled} hidden>
+      </div>
+      <div class="mt3 flex flex-column relative">
+
+        <input
+          class:oops={!usernameAvailable}
+          name="username"
+          placeholder="username"
+          on:keypress={updateUsername}
+          on:input={reset}
+          bind:this={usernameInput}
+          bind:value={username}
+        />
+        {#if checking}
+          <div class="checking mh2 gr-default">
+            <div class="lds-ring gr-center"><div></div><div></div><div></div><div></div></div>
           </div>
         {/if}
-            <input class="" type="text" autofocus="autofocus"
-            bind:this={usernameInput}
-            name="username" placeholder={usernamePlaceholder}>
-            <input name="federated" type=checkbox bind:checked={federated} hidden>
+        {#if !usernameAvailable}
+          <div class="checking mh2 gr-default pointer" on:click={resetUsername}>
+            <svg class="gr-center" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M5.72 5.72a.75.75 0 011.06 0L12 10.94l5.22-5.22a.75.75 0 111.06 1.06L13.06 12l5.22 5.22a.75.75 0 11-1.06 1.06L12 13.06l-5.22 5.22a.75.75 0 01-1.06-1.06L10.94 12 5.72 6.78a.75.75 0 010-1.06z"></path></svg>
+          </div>
+        {/if}
+        {#if available}
+          <div class="checking mh2 gr-default">
+            <svg class="gr-center" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M21.03 5.72a.75.75 0 010 1.06l-11.5 11.5a.75.75 0 01-1.072-.012l-5.5-5.75a.75.75 0 111.084-1.036l4.97 5.195L19.97 5.72a.75.75 0 011.06 0z"></path></svg>
+          </div>
+        {/if}
       </div>
       <div class="mt3 flex flex-column">
           <input class="" type="password"
             bind:this={passwordInput}
-          name="password" minlength="8" placeholder="password">
+          name="password" minlength="8"  disabled={signupDisabled} placeholder="password">
       </div>
       <div class="mt3 flex flex-column">
           <input class="" type="password"
             bind:this={repeatPasswordInput}
-          name="repeat" minlength="8" placeholder="repeat password">
+          name="repeat" minlength="8"  disabled={signupDisabled} placeholder="repeat password">
       </div>
 
       {#if signupError}
@@ -86,13 +192,14 @@ $: home = window.homeServer || ""
         </div>
       {/if}
 
+
     <div class="mt3 flex">
       <div class="">
         <button class="dark-button-small no-sel" 
-          disabled={loggingIn}
+          disabled={loggingIn || signupDisabled}
           on:click={signUp}
           type="submit" >
-          Sign Up
+          Create Account
         </button>
       </div>
       {#if loggingIn}
@@ -100,18 +207,20 @@ $: home = window.homeServer || ""
         <div class="lds-ring"><div></div><div></div><div></div><div></div></div>
       </div>
       {/if}
-      <div class="flex-one">
-      </div>
-      <div class="gr-center">
-        <div class="gr-center pointer" class:m-log={!federated}
-             title={tooltip}
-          on:click={toggleFederated}>
-          <svg class:fill-blue={federated} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" width="22" height="22">
-          <path id="Layer" fill="" d="M0.58 0.51L0.58 21.5L2.09 21.5L2.09 22L0 22L0 0L2.09 0L2.09 0.51L0.58 0.51ZM7.04 7.16L7.04 8.22L7.06 8.22C7.35 7.81 7.69 7.5 8.09 7.28C8.49 7.06 8.95 6.95 9.46 6.95C9.96 6.95 10.41 7.04 10.82 7.23C11.23 7.43 11.54 7.77 11.76 8.25C11.99 7.91 12.31 7.6 12.7 7.34C13.1 7.08 13.58 6.95 14.12 6.95C14.54 6.95 14.92 7 15.28 7.1C15.63 7.2 15.93 7.36 16.19 7.58C16.44 7.81 16.64 8.1 16.78 8.46C16.92 8.82 16.99 9.25 16.99 9.76L16.99 15.01L14.84 15.01L14.84 10.56C14.84 10.3 14.83 10.05 14.81 9.82C14.79 9.6 14.74 9.4 14.64 9.21C14.55 9.04 14.41 8.89 14.24 8.8C14.07 8.7 13.82 8.65 13.52 8.65C13.22 8.65 12.97 8.71 12.79 8.82C12.6 8.93 12.45 9.09 12.35 9.28C12.24 9.48 12.16 9.69 12.14 9.92C12.1 10.16 12.08 10.4 12.08 10.64L12.08 15.01L9.93 15.01L9.93 10.61C9.93 10.37 9.92 10.15 9.91 9.92C9.9 9.7 9.86 9.49 9.78 9.29C9.7 9.1 9.57 8.94 9.4 8.83C9.22 8.71 8.96 8.65 8.62 8.65C8.51 8.65 8.38 8.67 8.21 8.72C8.05 8.77 7.88 8.85 7.73 8.98C7.57 9.11 7.43 9.29 7.32 9.53C7.21 9.76 7.16 10.07 7.16 10.46L7.16 15.01L5.01 15.01L5.01 7.16L7.04 7.16ZM21.42 21.49L21.42 0.5L19.91 0.5L19.91 0L22 0L22 22L19.91 22L19.91 21.49L21.42 21.49Z" />
-          </svg>
-        </div>
-      </div>
     </div>
   </form>
 </div>
 
+<style>
+.oops {
+  border: 1px solid red;
+}
+
+.checking {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+}
+
+</style>

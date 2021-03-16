@@ -1,6 +1,9 @@
 package client
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -433,4 +436,30 @@ func (c *Client) GetLocalPartPath(s string, profile bool) string {
 	}
 
 	return strings.Join(g, "/")
+}
+
+type NewUser struct {
+	Username string
+	Password string
+	Admin    bool
+}
+
+func ConstructMac(u *NewUser, secret string) (string, error) {
+	admin := "notadmin"
+	if u.Admin {
+		admin = "admin"
+	}
+
+	joined := strings.Join([]string{u.Username, u.Password, admin}, "\x00")
+
+	mac := hmac.New(sha1.New, []byte(secret))
+	_, err := mac.Write([]byte(joined))
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	sha := hex.EncodeToString(mac.Sum(nil))
+
+	return sha, nil
 }

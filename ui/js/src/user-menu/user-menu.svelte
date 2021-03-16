@@ -66,6 +66,12 @@ function username() {
         </div>
 
         <div class="flex flex-column ph3 pv2  hov-bo">
+            <a href="/invite">
+                <span class="">Invite A Friend</span>
+            </a>
+        </div>
+
+        <div class="flex flex-column ph3 pv2  hov-bo">
             <a href="/settings">
                 <span class="">Account Settings</span>
             </a>

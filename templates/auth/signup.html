@@ -15,7 +15,12 @@
           <form class="flex flex-column" action="/signup"
             method="POST" autocomplete="off">
               <div class="flex flex-column">
-                  <input class="" type="text" autofocus="autofocus"
+                  <input class="" type="text" name="email"
+                  value={{.Email}}
+                  name="email" placeholder="email" disabled>
+              </div>
+              <div class="mt3 flex flex-column">
+                  <input class="" type="text"
                   minlength="3"
                   name="username" placeholder="username">
               </div>
@@ -24,37 +29,18 @@
                   name="password" minlength="8" placeholder="password">
               </div>
               <div class="mt3 flex flex-column">
-                  <input class="" type="password"
+                  <input class="" type="password" 
                   name="repeat" minlength="8" placeholder="repeat password">
               </div>
-              {{if .UserExists}}
-              <div class="">
-                That username is already taken.
-              </div>
-              {{end}}
-              {{if .ServerDown}}
-              <div class="">
-                Account could not be created.
-              </div>
-              {{end}}
 
               <script nonce={{.Nonce}}>
                 let signupError = false;
+                let signupDisabled = {{.RegistrationDisabled}}
+                let signupEmail = {{.Email}}
               </script>
-              {{if .SignupError}}
-              <script nonce={{.Nonce}}>
-                signupError = true;
-              </script>
-              {{end}}
-              {{if .Interactive}}
-              <script nonce={{.Nonce}}>
-                window.interactive = true;
-                window.homeServer = {{.HomeServer}};
-              </script>
-              {{end}}
             <div class="mt3">
               <button class="dark-button-small no-sel" 
-                type="submit" >
+                      type="submit" {{if .RegistrationDisabled}}disabled{{end}}>
                 Sign Up
               </button>
             </div>

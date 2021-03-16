@@ -14,12 +14,8 @@ port = 8008
 password = "CaR6hxVWKBzYn"
 
 [db]
-user = "hummingbard"
-password = "hummingbard"
-name = "hummingbard"
-host = "localhost"
-port = "5432"
-ssl = "require"
+client = "" # postgres connection string
+dendrite_user_api_accounts = "" # Dendrite userapi_accounts DB
 
 [redis]
 address = "localhost:6379"
@@ -30,9 +26,17 @@ db = 1
 prefix = "org.matrix.msc1772.space"
 
 [auth]
+verify_email = true
 disable_registration = false
 disable_federated_login = false
 disable_profile_creation = false
+shared_secret = "" #must match with shared_secret in dendrite.yaml
 
 [privacy]
 disable_public = false
+
+[email]
+server = ""
+port =  587
+username = ""
+password = ""

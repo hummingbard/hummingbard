@@ -230,3 +230,18 @@ type RespRegisterAvailable struct {
 type RespDeactivate struct {
 	IDServerUnbindSuccess bool `json:"id_server_unbind_success"`
 }
+
+type RespUpdatePassword struct{}
+
+type RespAdd3PID struct{}
+
+type ThreePID struct {
+	Medium      string `json:"medium"`
+	Address     string `json:"address"`
+	ValidatedAt int64  `json:"validated_at"`
+	AddedAt     int64  `json:"added_at"`
+}
+
+type RespGet3PID struct {
+	ThreePIDS []ThreePID `json:"threepids"`
+}

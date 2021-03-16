@@ -300,12 +300,33 @@ func (cli *Client) register(u string, req *ReqRegister) (resp *RespRegister, uia
 	return
 }
 
+func (cli *Client) legacyregister(u string, req *ReqLegacyRegister) (resp *RespRegister, uiaResp *RespUserInteractive, err error) {
+	err = cli.MakeRequest("POST", u, req, &resp)
+	if err != nil {
+		httpErr, ok := err.(HTTPError)
+		if !ok { // network error
+			return
+		}
+		if httpErr.Code == 401 {
+			// body should be RespUserInteractive, if it isn't, fail with the error
+			err = json.Unmarshal(httpErr.Contents, &uiaResp)
+			return
+		}
+	}
+	return
+}
+
 // Register makes an HTTP request according to http://matrix.org/docs/spec/client_server/r0.2.0.html#post-matrix-client-r0-register
 //
 // Registers with kind=user. For kind=guest, see RegisterGuest.
 func (cli *Client) Register(req *ReqRegister) (*RespRegister, *RespUserInteractive, error) {
 	u := cli.BuildURL("register")
 	return cli.register(u, req)
+}
+
+func (cli *Client) LegacyRegister(req *ReqLegacyRegister) (*RespRegister, *RespUserInteractive, error) {
+	u := cli.BuildURL("register")
+	return cli.legacyregister(u, req)
 }
 
 // RegisterGuest makes an HTTP request according to http://matrix.org/docs/spec/client_server/r0.2.0.html#post-matrix-client-r0-register
@@ -1062,6 +1083,24 @@ type UserPreferences struct {
 
 func (cli *Client) GetAccountPreferences(userID string) (resp *UserPreferences, err error) {
 	urlPath := cli.BuildURL("user", userID, "account_data", "com.hummingbard.user.preferences")
+	err = cli.MakeRequest("GET", urlPath, nil, &resp)
+	return
+}
+
+func (cli *Client) UpdatePassword(req interface{}) (resp *RespUpdatePassword, err error) {
+	urlPath := cli.BuildURL("account", "password")
+	err = cli.MakeRequest("POST", urlPath, req, &resp)
+	return
+}
+
+func (cli *Client) Add3PID(req interface{}) (resp interface{}, err error) {
+	urlPath := cli.BuildURL("account", "3pid")
+	err = cli.MakeRequest("POST", urlPath, req, &resp)
+	return
+}
+
+func (cli *Client) Get3PID() (resp *RespGet3PID, err error) {
+	urlPath := cli.BuildURL("account", "3pid")
 	err = cli.MakeRequest("GET", urlPath, nil, &resp)
 	return
 }

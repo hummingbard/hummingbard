@@ -20,8 +20,10 @@
           preferences: {
             dark_mode: {{.LoggedInUser.Preferences.DarkMode}},
             show_nsfw_posts: {{.LoggedInUser.Preferences.ShowNSFWPosts}},
-          }
+          },
           {{end}}
+          email: {{.LoggedInUser.Email}},
+          email_verified: {{.LoggedInUser.EmailVerified}}
         }
     {{end}}
   </script>

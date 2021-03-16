@@ -1,0 +1,49 @@
+{{define "verify-email"}}
+<html>
+  <head>
+    <title>Verify Email - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    {{template "dark-mode" Map "Nonce" .Nonce "LoggedInUser" .LoggedInUser}}
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "login"}}
+
+      <div class="center-content login">
+        <div class="gr-center w-350px brd pa3">
+
+          <form class="flex flex-column" action="/signup/verify" 
+           ref="login"
+            method="POST" autocomplete="off">
+
+              <div class="">
+                Let's verify your email first.
+              </div>
+
+              <div class="flex flex-column mt3">
+                  <input class="" type="email" autofocus="autofocus"
+                  name="email" placeholder="bob@peptides.com" required>
+              </div>
+
+
+            <div class="mt3 flex">
+              <div class="">
+                <button class="dark-button-small no-sel" 
+                  type="submit" >
+                  Verify my Email
+                </button>
+              </div>
+              <div class="flex-one">
+              </div>
+              <div class="gr-center">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      {{template "state" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,22 @@
+{{define "signup-disabled"}}
+<html>
+  <head>
+    <title>Sign Up - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    {{template "dark-mode" Map "Nonce" .Nonce "LoggedInUser" .LoggedInUser}}
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "signup"}}
+
+      <div class="center-content signup">
+        <div class="gr-center lh-copy w-350px brd pa3 tc">
+          Signups have been disabled. You can still <a href="/login"><span class="primary">log in</span></a> with an existing account.
+        </div>
+      </div>
+      {{template "state" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}

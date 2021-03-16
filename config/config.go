@@ -22,12 +22,8 @@ type Matrix struct {
 }
 
 type DB struct {
-	User     string `toml:"user"`
-	Password string `toml:"password"`
-	Name     string `toml:"name"`
-	Host     string `toml:"host"`
-	Port     string `toml:"port"`
-	SSL      string `toml:"ssl"`
+	Client                  string `toml:"client"`
+	DendriteUserAPIAccounts string `toml:"dendrite_user_api_accounts"`
 }
 
 type Redis struct {
@@ -41,13 +37,22 @@ type Spaces struct {
 }
 
 type Auth struct {
-	DisableRegistration    bool `toml:"disable_registration"`
-	DisableFederatedLogin  bool `toml:"disable_federated_login"`
-	DisableProfileCreation bool `toml:"disable_profile_creation"`
+	VerifyEmail            bool   `toml:"verify_email"`
+	DisableRegistration    bool   `toml:"disable_registration"`
+	DisableFederatedLogin  bool   `toml:"disable_federated_login"`
+	DisableProfileCreation bool   `toml:"disable_profile_creation"`
+	SharedSecret           string `toml:"shared_secret"`
 }
 
 type Privacy struct {
 	DisablePublic bool `toml:"disable_public"`
+}
+
+type Email struct {
+	Server   string `toml:"server"`
+	Port     string `toml:"port"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
 }
 
 type Config struct {
@@ -61,6 +66,7 @@ type Config struct {
 	Spaces     Spaces  `toml:"spaces"`
 	Auth       Auth    `toml:"auth"`
 	Privacy    Privacy `toml:"privacy"`
+	Email      Email   `toml:"email"`
 }
 
 var conf Config

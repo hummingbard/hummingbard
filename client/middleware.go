@@ -74,7 +74,6 @@ func (c *Client) GetLoggedInUser(h http.Handler) http.Handler {
 //makes sure this route is autehnticated
 func (c *Client) RequireAuthentication(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Println("are we authenticated?")
 
 		s, err := GetSession(r, c)
 		if err != nil {
@@ -109,6 +108,28 @@ func (c *Client) RequireAuthentication(h http.Handler) http.Handler {
 		if err != nil || us.UserID == "" {
 			log.Println(err)
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		h.ServeHTTP(w, r)
+	})
+}
+
+//makes sure this route is autehnticated
+func (c *Client) GuestsOnly(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		s, err := GetSession(r, c)
+		if err != nil {
+			log.Println(err)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		token, ok := s.Values["access_token"].(string)
+
+		if ok || len(token) > 0 {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 

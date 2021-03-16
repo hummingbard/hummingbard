@@ -39,13 +39,15 @@ type User struct {
 	WellKnown         string                   `json:"well_known"`
 	Federated         bool                     `json:"federated"`
 	Preferences       gomatrix.UserPreferences `json:"preferences"`
+	Email             string                   `json:"email"`
+	EmailVerified     bool                     `json:"email_verified"`
 }
 
 func NewSession(sec string) *sessions.CookieStore {
 	s := sessions.NewCookieStore([]byte(sec))
 	s.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   864000 * 150,
+		MaxAge:   0,
 		HttpOnly: false,
 	}
 	return s

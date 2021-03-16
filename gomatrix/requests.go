@@ -10,6 +10,18 @@ type ReqRegister struct {
 	Auth                     interface{} `json:"auth,omitempty"`
 }
 
+type ReqLegacyRegister struct {
+	Username                 string      `json:"user,omitempty"`
+	BindEmail                bool        `json:"bind_email,omitempty"`
+	Password                 string      `json:"password,omitempty"`
+	DeviceID                 string      `json:"device_id,omitempty"`
+	InitialDeviceDisplayName string      `json:"initial_device_display_name"`
+	Auth                     interface{} `json:"auth,omitempty"`
+	Type                     string      `json:"type"`
+	Mac                      string      `json:"mac"`
+	Admin                    bool        `json:"admin"`
+}
+
 type ReqRegisterAvailable struct {
 	Username string `json:"username,omitempty"`
 }

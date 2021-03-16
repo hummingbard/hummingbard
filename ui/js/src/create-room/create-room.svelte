@@ -129,7 +129,7 @@ $: usernameText = username.length > 0 ? username : `music`
 
 async function checkUsername() {
 
-    let endpoint = `/username/available`
+    let endpoint = `/username/space/available`
 
     let data = {
         username: username,

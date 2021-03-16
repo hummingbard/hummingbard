@@ -80,6 +80,9 @@ let build = (e) => {
 
 async function uploadImage() {
     let endpoint = `${homeserverURL}/_matrix/media/r0/upload`
+  if(identity?.federated && identity?.well_known?.length > 0) {
+    endpoint = `${identity.well_known}/_matrix/media/r0/upload`
+  }
 
     let resp = await fetch(endpoint, {
     method: 'POST', // or 'PUT'

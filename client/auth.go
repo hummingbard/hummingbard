@@ -1,12 +1,14 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"hummingbard/gomatrix"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/unrolled/secure"
 )
@@ -20,11 +22,14 @@ func (c *Client) Login() http.HandlerFunc {
 
 		type page struct {
 			BasePage
-			UserExists     bool
-			ServerDown     bool
-			LoginError     bool
-			LoginUsername  string
-			LoginFederated bool
+			UserExists                bool
+			ServerDown                bool
+			LoginError                bool
+			LoginUsername             string
+			LoginFederated            bool
+			FederationDisabled        bool
+			FederationDisabledWarning bool
+			PasswordResetSuccess      bool
 		}
 
 		nonce := secure.CSPNonce(r.Context())
@@ -47,6 +52,10 @@ func (c *Client) Login() http.HandlerFunc {
 			f := s.Flashes("login-federated")
 			if len(f) > 0 {
 				t.LoginFederated = f[0].(bool)
+			}
+			p := s.Flashes("password-reset-success")
+			if len(p) > 0 {
+				t.PasswordResetSuccess = true
 			}
 			s.Save(r, w)
 		}
@@ -325,11 +334,13 @@ func (c *Client) Signup() http.HandlerFunc {
 
 		type page struct {
 			BasePage
-			UserExists  bool
-			ServerDown  bool
-			SignupError bool
-			Interactive bool
-			HomeServer  string
+			UserExists           bool
+			ServerDown           bool
+			SignupError          bool
+			Interactive          bool
+			HomeServer           string
+			RegistrationDisabled bool
+			Email                string
 		}
 
 		nonce := secure.CSPNonce(r.Context())
@@ -361,8 +372,82 @@ func (c *Client) Signup() http.HandlerFunc {
 
 		t.Nonce = nonce
 
+		query := r.URL.Query()
+		code := query.Get("code")
+
+		if c.Config.Auth.DisableRegistration && len(code) == 0 {
+			c.Templates.ExecuteTemplate(w, "signup-disabled", t)
+			return
+		}
+
+		if c.Config.Auth.VerifyEmail && code == "" {
+			c.Templates.ExecuteTemplate(w, "verify-email", t)
+			return
+		}
+
+		ctx := context.Background()
+		ctx, _ = context.WithTimeout(ctx, 7*time.Second)
+		email, valid, err := c.GetEmailVerificationToken(ctx, code)
+		if err != nil || !valid {
+			log.Println(err)
+			c.VerificationCodeInvalid(w, r)
+			return
+		}
+		t.Email = email
+
 		c.Templates.ExecuteTemplate(w, "signup", t)
 	}
+}
+
+func (c *Client) SignupDisabled() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		//us := LoggedInUser(r)
+
+		type page struct {
+			BasePage
+		}
+
+		nonce := secure.CSPNonce(r.Context())
+
+		t := &page{}
+
+		t.Nonce = nonce
+
+		c.Templates.ExecuteTemplate(w, "signup-disabled", t)
+	}
+}
+
+func (c *Client) VerificationCodeInvalid(w http.ResponseWriter, r *http.Request) {
+	us := LoggedInUser(r)
+
+	type page struct {
+		BasePage
+	}
+
+	nonce := secure.CSPNonce(r.Context())
+
+	t := &page{}
+
+	t.Nonce = nonce
+	t.LoggedInUser = us
+
+	c.Templates.ExecuteTemplate(w, "invalid-verification-code", t)
+}
+
+func (c *Client) PasswordResetCodeInvalid(w http.ResponseWriter, r *http.Request) {
+	//us := LoggedInUser(r)
+
+	type page struct {
+		BasePage
+	}
+
+	nonce := secure.CSPNonce(r.Context())
+
+	t := &page{}
+
+	t.Nonce = nonce
+
+	c.Templates.ExecuteTemplate(w, "invalid-password-reset-code", t)
 }
 
 // Copied from Dendrite clientapi/routing/register.go
@@ -379,6 +464,7 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 
 		r.ParseForm()
 
+		email := r.FormValue("email")
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 		repeat := r.FormValue("repeat")
@@ -403,8 +489,9 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 		}
 
 		type Auth struct {
-			Type    string
-			Session string
+			Type    string `json:"type"`
+			Session string `json:"session"`
+			Mac     string `json:"mac"`
 		}
 
 		s, err := GetSession(r, c)
@@ -415,8 +502,6 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 		}
 
 		serverName := c.URLScheme(c.Config.Matrix.Server) + fmt.Sprintf(`:%d`, c.Config.Matrix.Port)
-
-		hs := GetHomeServerPart(username)
 
 		if strings.Contains(username, ":") {
 			_, us := c.IsFederated(username)
@@ -463,15 +548,27 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 		}
 
 		//actually register the user
-		resp, inter, err := matrix.Register(&gomatrix.ReqRegister{
+		mac, err := ConstructMac(&NewUser{
 			Username: username,
 			Password: password,
-			Auth: Auth{
-				Type: "m.login.dummy",
-			},
-		})
+		}, c.Config.Auth.SharedSecret)
+		if err != nil {
+			log.Println(err)
+		}
+
+		matrix.Prefix = "/_matrix/client/api/v1"
+
+		req := &gomatrix.ReqLegacyRegister{
+			Username: username,
+			Password: password,
+			Type:     "org.matrix.login.shared_secret",
+			Mac:      mac,
+		}
+
+		resp, inter, err := matrix.LegacyRegister(req)
 
 		if err != nil || (resp == nil && inter == nil) {
+			log.Println(err)
 			s.AddFlash("Server Down", "server-down")
 			s.Save(r, w)
 
@@ -479,18 +576,9 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 			return
 		}
 
-		if inter != nil {
-			log.Printf("%+v\n", inter)
-
-			s.AddFlash(hs, "interactive")
-			s.Save(r, w)
-
-			http.Redirect(w, r, "/signup", http.StatusSeeOther)
-			return
-		}
+		matrix.Prefix = "/_matrix/client/r0"
 
 		// create the user's timeline room
-
 		matrix.SetCredentials(resp.UserID, resp.AccessToken)
 
 		//let them join #public
@@ -498,6 +586,20 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 
 			pub := fmt.Sprintf(`#public:%s`, c.Config.Client.Domain)
 			_, err := matrix.JoinRoom(pub, "", nil)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+
+		go func() {
+			ctx := context.Background()
+			ctx, _ = context.WithTimeout(ctx, 7*time.Second)
+			err := c.AddNewUser(ctx, resp.UserID, email, resp.AccessToken)
+			if err != nil {
+				log.Println(err)
+			}
+
+			err = c.UnsafeAddEmail(ctx, username, email)
 			if err != nil {
 				log.Println(err)
 			}
@@ -592,7 +694,6 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 			RefreshToken:      resp.RefreshToken,
 			JoinedRooms:       rms,
 			RoomID:            crr.RoomID,
-			WellKnown:         serverName,
 		}
 
 		serialized, err := json.Marshal(u)
@@ -681,6 +782,265 @@ func (c *Client) Logout() http.HandlerFunc {
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+}
+
+func (c *Client) VerifySignupEmail() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+
+		email := r.FormValue("email")
+
+		ctx := context.Background()
+		ctx, _ = context.WithTimeout(ctx, 7*time.Second)
+		exists, err := c.DoesUserExist(ctx, email)
+		if err != nil {
+			log.Println(err)
+			c.Error(w, r)
+			return
+		}
+
+		if !exists && len(email) > 0 {
+			go c.SendSignupVerificationEmail(email)
+		}
+
+		type page struct {
+			BasePage
+			UserExists           bool
+			ServerDown           bool
+			SignupError          bool
+			Interactive          bool
+			HomeServer           string
+			RegistrationDisabled bool
+		}
+
+		nonce := secure.CSPNonce(r.Context())
+
+		t := &page{}
+
+		s, err := GetSession(r, c)
+		if err != nil {
+			log.Println(err)
+		}
+		if s != nil {
+			x := s.Flashes("user-exists")
+			if len(x) > 0 {
+				t.UserExists = true
+				s.Save(r, w)
+			}
+			y := s.Flashes("server-down")
+			if len(y) > 0 {
+				t.ServerDown = true
+				s.Save(r, w)
+			}
+			i := s.Flashes("interactive")
+			if len(i) > 0 {
+				t.Interactive = true
+				t.HomeServer = i[0].(string)
+				s.Save(r, w)
+			}
+		}
+
+		t.Nonce = nonce
+
+		c.Templates.ExecuteTemplate(w, "verify-success", t)
+	}
+}
+
+func (c *Client) UsernameAvailable() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		type payload struct {
+			Username string `json:"username"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+
+		err := json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
+		type Response struct {
+			Available bool `json:"available"`
+		}
+
+		ff := Response{}
+
+		av, err := c.Matrix.RegisterAvailable(&gomatrix.ReqRegisterAvailable{
+			Username: pay.Username,
+		})
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		if av != nil && av.Available {
+			ff.Available = true
+		}
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	}
+}
+
+func (c *Client) PasswordReset() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		type page struct {
+			BasePage
+			Code  string
+			Email string
+		}
+
+		nonce := secure.CSPNonce(r.Context())
+
+		t := &page{}
+
+		t.Nonce = nonce
+
+		query := r.URL.Query()
+		code := query.Get("code")
+
+		if len(code) > 0 {
+
+			ctx := context.Background()
+			ctx, _ = context.WithTimeout(ctx, 7*time.Second)
+			email, valid, err := c.GetPasswordResetToken(ctx, code)
+			if err != nil || !valid {
+				log.Println(err)
+				c.PasswordResetCodeInvalid(w, r)
+				return
+			}
+
+			t.Code = code
+			t.Email = email
+
+			c.Templates.ExecuteTemplate(w, "password-reset-confirm", t)
+			return
+		}
+
+		c.Templates.ExecuteTemplate(w, "password-reset", t)
+	}
+}
+
+func (c *Client) ValidatePasswordReset() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		r.ParseForm()
+
+		email := r.FormValue("email")
+
+		log.Println("what is email??", email)
+		log.Println("what is email??", email)
+		log.Println("what is email??", email)
+		log.Println("what is email??", email)
+
+		ctx := context.Background()
+		ctx, _ = context.WithTimeout(ctx, 7*time.Second)
+		exists, err := c.DoesUserExist(ctx, email)
+		if err != nil {
+			log.Println(err)
+			c.Error(w, r)
+			return
+		}
+
+		if exists && len(email) > 0 {
+			go c.SendPasswordResetEmail(email)
+		}
+
+		type page struct {
+			BasePage
+		}
+
+		nonce := secure.CSPNonce(r.Context())
+
+		t := &page{}
+
+		t.Nonce = nonce
+
+		c.Templates.ExecuteTemplate(w, "password-reset-code-sent", t)
+	}
+}
+
+func (c *Client) ConfirmPasswordReset() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		r.ParseForm()
+
+		email := r.FormValue("email")
+		password := r.FormValue("password")
+
+		ctx := context.Background()
+		ctx, _ = context.WithTimeout(ctx, 7*time.Second)
+		userID, _, err := c.GetUser(ctx, email)
+		if err != nil && len(userID) == 0 {
+			log.Println(err)
+			c.Error(w, r)
+			return
+		}
+
+		username := GetLocalPart(userID)
+
+		err = c.UnsafePasswordReset(ctx, username, password)
+		if err != nil {
+			log.Println(err)
+			c.Error(w, r)
+			return
+		}
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		err = c.InvalidatePasswordResetCode(ctx, email)
+		if err != nil {
+			log.Println(err)
+			c.Error(w, r)
+			return
+		}
+
+		if err != nil {
+			log.Println(err)
+		}
+
+		type page struct {
+			BasePage
+		}
+
+		nonce := secure.CSPNonce(r.Context())
+
+		t := &page{}
+
+		t.Nonce = nonce
+
+		s, err := GetSession(r, c)
+		if err != nil {
+			log.Println(err)
+			c.Error(w, r)
+			return
+		}
+
+		s.AddFlash("Password Reset", "password-reset-success")
+		s.Save(r, w)
+
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 }

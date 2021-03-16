@@ -380,39 +380,55 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	archaic := c.IsRoomArchaic(state)
+
 	//get room messages
 	events := []gomatrix.Event{}
 
-	rc := c.RoomCreateEventFromState(state)
+	if !archaic {
 
-	cli.Prefix = "/_matrix/client/"
+		rc := c.RoomCreateEventFromState(state)
 
-	opts := map[string]interface{}{
-		"event_id":         rc,
-		"room_id":          string(ra.RoomID),
-		"depth_first":      false,
-		"recent_first":     true,
-		"include_parent":   false,
-		"include_children": true,
-		"direction":        "down",
-		"limit":            14,
-		"max_depth":        0,
-		"max_breadth":      0,
-		"last_event":       "0",
-	}
+		cli.Prefix = "/_matrix/client/"
 
-	relationships, err := cli.GetRelationships(opts)
-	if err != nil {
-		log.Println(err)
-	}
+		opts := map[string]interface{}{
+			"event_id":         rc,
+			"room_id":          string(ra.RoomID),
+			"depth_first":      false,
+			"recent_first":     true,
+			"include_parent":   false,
+			"include_children": true,
+			"direction":        "down",
+			"limit":            14,
+			"max_depth":        0,
+			"max_breadth":      0,
+			"last_event":       "0",
+		}
 
-	cli.Prefix = "/_matrix/client/r0"
+		relationships, err := cli.GetRelationships(opts)
+		if err != nil {
+			log.Println(err)
+		}
 
-	if relationships != nil && len(relationships.Events) > 0 {
-		events = relationships.Events
+		cli.Prefix = "/_matrix/client/r0"
+
+		if relationships != nil && len(relationships.Events) > 0 {
+			events = relationships.Events
+		}
+
+	} else {
+		msg, err := cli.Messages(string(roomID), "", "", 'b', 13, "")
+		if err != nil {
+			log.Println(err)
+			log.Println(err)
+			log.Println(err)
+		}
+		events = msg.Chunk
 	}
 
 	posts := c.ProcessMessages(events, state, us)
+	log.Println("messages length si ", len(events))
+	log.Println("messages length si ", len(posts))
 
 	isPage := c.IsPage(state)
 
@@ -510,6 +526,7 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 			ID:        messagesFrom,
 			Children:  children,
 			Pages:     pages,
+			Archaic:   archaic,
 		},
 		Posts:         posts,
 		RoomState:     state,
@@ -1183,10 +1200,10 @@ func (c *Client) GetMoreMessages() http.HandlerFunc {
 
 func (c *Client) OperatorJoinRoom(roomID string) error {
 	//see whether default accout has already joined this room
-	rooms, ok := c.Cache.Rooms.Get(c.DefaultUser.UserID)
+	rooms, ok := c.Cache.PublicRooms.Get("public")
 	if ok {
-		for i, _ := range rooms.([]string) {
-			if roomID == rooms.([]string)[i] {
+		for i, _ := range rooms.([]*PublicRoom) {
+			if roomID == rooms.([]*PublicRoom)[i].RoomID {
 				return nil
 			}
 		}

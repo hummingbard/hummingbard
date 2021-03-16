@@ -76,6 +76,7 @@ func routes(c *Client) chi.Router {
 
 	r.Route("/login", func(r chi.Router) {
 		r.Use(secureMiddleware.Handler)
+		r.Use(c.GuestsOnly)
 		r.Get("/", c.Login())
 		r.Post("/", c.ValidateLogin())
 	})
@@ -86,10 +87,31 @@ func routes(c *Client) chi.Router {
 		r.Get("/", c.Logout())
 	})
 
+	r.Route("/password", func(r chi.Router) {
+		r.Use(secureMiddleware.Handler)
+		r.Use(c.GuestsOnly)
+		r.Get("/reset", c.PasswordReset())
+		r.Post("/reset", c.ValidatePasswordReset())
+		r.Post("/reset/confirm", c.ConfirmPasswordReset())
+	})
+
+	r.Route("/verify", func(r chi.Router) {
+		r.Use(secureMiddleware.Handler)
+		r.Get("/", c.VerifyEmailUpdate())
+	})
+
 	r.Route("/signup", func(r chi.Router) {
 		r.Use(secureMiddleware.Handler)
 		r.Get("/", c.Signup())
+		r.Post("/verify", c.VerifySignupEmail())
 		r.Post("/", c.ValidateSignup())
+	})
+
+	r.Route("/invite", func(r chi.Router) {
+		r.Use(secureMiddleware.Handler)
+		r.Use(c.RequireAuthentication)
+		r.Get("/", c.Invite())
+		r.Post("/", c.ValidateInvite())
 	})
 
 	r.Route("/messages", func(r chi.Router) {
@@ -115,6 +137,7 @@ func routes(c *Client) chi.Router {
 		r.Use(c.RequireAuthentication)
 		r.Use(secureMiddleware.Handler)
 		r.Get("/", c.Settings())
+		//r.Get("/mfa", c.NewMFA())
 	})
 
 	r.Route("/spaces", func(r chi.Router) {
@@ -137,6 +160,9 @@ func routes(c *Client) chi.Router {
 		r.Use(secureMiddleware.Handler)
 		r.Post("/preferences/update", c.UpdatePreferences())
 		r.Post("/delete", c.DeleteAccount())
+		r.Post("/password/update", c.UpdatePassword())
+		r.Post("/email/update", c.ChangeEmail())
+		r.Post("/email/resend", c.ResendEmailVerification())
 	})
 
 	r.Route("/room", func(r chi.Router) {
@@ -155,6 +181,7 @@ func routes(c *Client) chi.Router {
 	r.Route("/username", func(r chi.Router) {
 		r.Get("/", c.NotFound)
 		r.Post("/available", c.UsernameAvailable())
+		r.Post("/space/available", c.SpaceUsernameAvailable())
 	})
 
 	r.Route("/create", func(r chi.Router) {

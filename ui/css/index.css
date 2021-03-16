@@ -735,6 +735,10 @@ select:focus{
   color: red;
 }
 
+.success {
+  color: green;
+}
+
 .m-log {
   opacity: 0.7;
   transition: 0.1s;
@@ -755,7 +759,7 @@ select:focus{
 }
 
 .fill-blue {
-  fill: blue;
+  fill: red;
 }
 
 

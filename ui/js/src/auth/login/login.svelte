@@ -31,12 +31,12 @@ function toggleFederated() {
 }
 
 $: usernamePlaceholder = federated ? `@username:homeserver.org` : `username`
-$: tooltip = !federated ? `Log in with an existing matrix account` : `Log in with a Hummingbard account`
+$: tooltip = !federated ? `Log in with an external matrix account` : `Log in with a Hummingbard account`
 
 </script>
 
 
-<div class="gr-center w-350px brd pa3">
+<div class="gr-center">
 
   <form class="flex flex-column" 
   action="/login" 
@@ -46,7 +46,12 @@ $: tooltip = !federated ? `Log in with an existing matrix account` : `Log in wit
       <div class="flex flex-column">
         {#if federated}
         <div class="mb3 fs-09 lh-copy">
-          Log in with an existing <br/> matrix account.
+          Log in with an external <br/> matrix account.
+        </div>
+        {/if}
+        {#if passwordReset}
+        <div class="mb3 fs-09 lh-copy">
+          Your password was reset successfully. You can log in now.
         </div>
         {/if}
             <input class="" type="text" autofocus="autofocus"
@@ -67,6 +72,12 @@ $: tooltip = !federated ? `Log in with an existing matrix account` : `Log in wit
               </div>
       {/if}
 
+      {#if federationDisabledWarning}
+        <div class="mt3 warn lh-copy">
+            Federation has been disabled. Please use a local account.
+        </div>
+      {/if}
+
     <div class="mt3 flex">
       <div class="">
         <button class="dark-button-small no-sel" 
@@ -83,6 +94,7 @@ $: tooltip = !federated ? `Log in with an existing matrix account` : `Log in wit
       {/if}
       <div class="flex-one">
       </div>
+      {#if !federationDisabled}
       <div class="gr-center">
         <div class="gr-center pointer" class:m-log={!federated}
              title={tooltip}
@@ -92,7 +104,9 @@ $: tooltip = !federated ? `Log in with an existing matrix account` : `Log in wit
           </svg>
         </div>
       </div>
+      {/if}
     </div>
   </form>
+
 </div>
 

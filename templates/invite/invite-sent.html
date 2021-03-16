@@ -1,0 +1,26 @@
+{{define "invite-sent"}}
+<html>
+  <head>
+    <title>Invitation Sent - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    {{template "dark-mode" Map "Nonce" .Nonce "LoggedInUser" .LoggedInUser}}
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "login"}}
+
+      <div class="center-content login">
+        <div class="gr-center w-350px brd pa3">
+
+              <div class="lh-copy tc">
+                We sent an invitation email to your friend.
+              </div>
+
+        </div>
+      </div>
+      {{template "state" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}

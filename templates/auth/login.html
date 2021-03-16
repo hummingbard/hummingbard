@@ -9,8 +9,9 @@
     <div class="root">
       {{template "header" Map "Page" . "Name" "login"}}
 
-      <div class="center-content login">
-        <div class="gr-center w-350px brd pa3">
+      <div class="center-content">
+      <div class="flex flex-column gr-center">
+        <div class="gr-center w-350px brd pa3 login">
 
           <form class="flex flex-column" action="/login" 
            ref="login"
@@ -34,6 +35,9 @@
                 let loginError = false;
                 let loginUsername = {{.LoginUsername}}
                 let loginFederated = {{.LoginFederated}}
+                let federationDisabled = {{.FederationDisabled}}
+                let federationDisabledWarning = {{.FederationDisabledWarning}}
+                let passwordReset = {{.PasswordResetSuccess}}
               </script>
               {{if .LoginError}}
               <script nonce={{.Nonce}}>
@@ -58,6 +62,12 @@
             </div>
           </form>
         </div>
+
+        <div class="mt3 tc">
+          <a href="/password/reset"><span class="fs-09 primary">Forgot your password?</span></a>
+        </div>
+
+      </div>
       </div>
       {{template "state" .}}
       <script defer nonce={{.Nonce}} src="{{ InsertJS "login" }}"></script>

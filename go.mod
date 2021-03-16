@@ -25,6 +25,7 @@ require (
 	github.com/matrix-org/dendrite v0.3.4
 	github.com/matrix-org/gomatrix v0.0.0-20200827122206-7dd5e2a05bcd
 	github.com/microcosm-cc/bluemonday v1.0.1
+	github.com/pquerna/otp v1.3.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/russross/blackfriday v1.5.2
 	github.com/russross/blackfriday/v2 v2.0.1
@@ -32,6 +33,7 @@ require (
 	github.com/temoto/robotstxt v1.1.1 // indirect
 	github.com/tidwall/gjson v1.6.7
 	github.com/unrolled/secure v1.0.8
+	golang.org/x/crypto v0.0.0-20201117144127-c1f2f97bffc9 // indirect
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
 	golang.org/x/oauth2 v0.0.0-20210113205817-d3ed898aa8a3 // indirect
 	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect

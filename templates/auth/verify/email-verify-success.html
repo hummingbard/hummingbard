@@ -1,0 +1,26 @@
+{{define "email-update-success"}}
+<html>
+  <head>
+    <title>Email Verified - Hummingbard</title>
+    {{template "common-head" .}}
+  </head>
+  <body>
+    {{template "dark-mode" Map "Nonce" .Nonce "LoggedInUser" .LoggedInUser}}
+    <div class="root">
+      {{template "header" Map "Page" . "Name" "login"}}
+
+      <div class="center-content login">
+        <div class="gr-center w-350px brd pa3">
+
+              <div class="lh-copy tc">
+                Your email was verified and updated.
+              </div>
+
+        </div>
+      </div>
+      {{template "state" .}}
+
+    </div>
+  </body>
+</html>
+{{end}}

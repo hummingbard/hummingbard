@@ -66,6 +66,7 @@ func (c *Client) UpdatePreferences() http.HandlerFunc {
 		w.Write(js)
 	}
 }
+
 func (c *Client) DeleteAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -136,3 +137,165 @@ func (c *Client) DeleteAccount() http.HandlerFunc {
 		w.Write(js)
 	}
 }
+
+func (c *Client) UpdatePassword() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		token := r.Header.Get("Authorization")
+
+		user, err := c.GetTokenUser(token)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		type payload struct {
+			OldPassword    string `json:"old_password"`
+			NewPassword    string `json:"new_password"`
+			RepeatPassword string `json:"repeat_password"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+		err = json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
+		type Response struct {
+			Updated bool `json:"updated"`
+			Error   bool `json:"error"`
+		}
+
+		res := Response{}
+
+		if (len(pay.OldPassword) < 8 ||
+			len(pay.NewPassword) < 8 ||
+			len(pay.RepeatPassword) < 8) ||
+			(pay.NewPassword != pay.RepeatPassword) {
+
+			res.Error = true
+			js, err := json.Marshal(res)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(js)
+			return
+		}
+
+		matrix, err := c.TempMatrixClient(user.UserID, user.MatrixAccessToken)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		username := GetLocalPart(user.UserID)
+
+		rl := &gomatrix.ReqLogin{
+			Type:     "m.login.password",
+			User:     username,
+			Password: pay.OldPassword,
+		}
+
+		_, err = matrix.Login(rl)
+		if err != nil {
+			log.Println(err)
+			res.Error = true
+			js, err := json.Marshal(res)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(js)
+			return
+		}
+
+		_, err = matrix.UpdatePassword(map[string]interface{}{
+			"new_password": pay.NewPassword,
+			"auth": map[string]interface{}{
+				"user":     username,
+				"password": pay.OldPassword,
+				"type":     "m.login.password",
+			},
+		})
+
+		if err != nil {
+			log.Println(err)
+			res.Error = true
+		}
+
+		res.Updated = true
+
+		js, err := json.Marshal(res)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+}
+
+/*
+func (c *Client) NewMFA() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		token := r.Header.Get("Authorization")
+
+		user, err := c.GetTokenUser(token)
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		type Response struct {
+			Secret string `json:"secret"`
+			Image  []byte `json:"image"`
+		}
+
+		ff := Response{}
+
+		key, err := totp.Generate(totp.GenerateOpts{
+			Issuer:      c.Config.Name,
+			AccountName: user.UserID,
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		var buf bytes.Buffer
+		img, err := key.Image(400, 400)
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		png.Encode(&buf, img)
+
+		ff.Secret = key.Secret()
+		ff.Image = buf.Bytes()
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+	}
+}
+*/

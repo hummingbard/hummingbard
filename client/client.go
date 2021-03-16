@@ -28,17 +28,18 @@ func init() {
 }
 
 type Client struct {
-	Config      *config.Config
-	Router      *chi.Mux
-	HTTP        *http.Server
-	Templates   *Template
-	Sessions    *sessions.CookieStore
-	Store       *redis.Client
-	Matrix      *gomatrix.Client
-	DefaultUser User
-	Cache       *cache.Cache
-	DB          *DB
-	Cron        *cron.Cron
+	Config            *config.Config
+	Router            *chi.Mux
+	HTTP              *http.Server
+	Templates         *Template
+	Sessions          *sessions.CookieStore
+	Store             *redis.Client
+	Matrix            *gomatrix.Client
+	DefaultUser       User
+	Cache             *cache.Cache
+	DB                *DB
+	UserAPIAccountsDB *DB
+	Cron              *cron.Cron
 }
 
 func (c *Client) Activate() {
@@ -70,7 +71,12 @@ func (c *Client) Activate() {
 }
 
 func Start() {
-	db, err := NewDB()
+	db, err := NewDB("")
+	if err != nil {
+		panic(err)
+	}
+
+	uapidb, err := NewDB("userapi_accounts")
 	if err != nil {
 		panic(err)
 	}
@@ -137,6 +143,7 @@ func Start() {
 		type Auth struct {
 			Type    string
 			Session string
+			Admin   bool
 		}
 		resp, _, err := matrix.Register(&gomatrix.ReqRegister{
 			Username: username,
@@ -146,13 +153,37 @@ func Start() {
 			},
 		})
 		log.Println(resp)
+		//actually register the user
+		mac, err := ConstructMac(&NewUser{
+			Username: username,
+			Password: password,
+			Admin:    true,
+		}, conf.Auth.SharedSecret)
+		if err != nil {
+			log.Println(err)
+		}
+
+		matrix.Prefix = "/_matrix/client/api/v1"
+
+		req := &gomatrix.ReqLegacyRegister{
+			Username: username,
+			Password: password,
+			Type:     "org.matrix.login.shared_secret",
+			Mac:      mac,
+			Admin:    true,
+		}
+
+		resp, _, err = matrix.LegacyRegister(req)
 
 		if err != nil || resp == nil {
 			panic(err)
 		}
+
 		defUser.UserID = resp.UserID
 		defUser.AccessToken = resp.AccessToken
 		matrix.SetCredentials(resp.UserID, resp.AccessToken)
+
+		matrix.Prefix = "/_matrix/client/r0"
 
 	}
 
@@ -205,9 +236,10 @@ func Start() {
 	cron := cron.New()
 
 	c := &Client{
-		DB:     db,
-		Config: conf,
-		Matrix: matrix,
+		DB:                db,
+		UserAPIAccountsDB: uapidb,
+		Config:            conf,
+		Matrix:            matrix,
 		HTTP: &http.Server{
 			ReadTimeout:  21 * time.Second,
 			WriteTimeout: 60 * time.Second,
