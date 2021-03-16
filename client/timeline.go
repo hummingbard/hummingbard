@@ -380,55 +380,38 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	archaic := c.IsRoomArchaic(state)
-
-	//get room messages
 	events := []gomatrix.Event{}
 
-	if !archaic {
+	rc := c.RoomCreateEventFromState(state)
 
-		rc := c.RoomCreateEventFromState(state)
+	cli.Prefix = "/_matrix/client/"
 
-		cli.Prefix = "/_matrix/client/"
+	opts := map[string]interface{}{
+		"event_id":         rc,
+		"room_id":          string(ra.RoomID),
+		"depth_first":      false,
+		"recent_first":     true,
+		"include_parent":   false,
+		"include_children": true,
+		"direction":        "down",
+		"limit":            14,
+		"max_depth":        0,
+		"max_breadth":      0,
+		"last_event":       "0",
+	}
 
-		opts := map[string]interface{}{
-			"event_id":         rc,
-			"room_id":          string(ra.RoomID),
-			"depth_first":      false,
-			"recent_first":     true,
-			"include_parent":   false,
-			"include_children": true,
-			"direction":        "down",
-			"limit":            14,
-			"max_depth":        0,
-			"max_breadth":      0,
-			"last_event":       "0",
-		}
+	relationships, err := cli.GetRelationships(opts)
+	if err != nil {
+		log.Println(err)
+	}
 
-		relationships, err := cli.GetRelationships(opts)
-		if err != nil {
-			log.Println(err)
-		}
+	cli.Prefix = "/_matrix/client/r0"
 
-		cli.Prefix = "/_matrix/client/r0"
-
-		if relationships != nil && len(relationships.Events) > 0 {
-			events = relationships.Events
-		}
-
-	} else {
-		msg, err := cli.Messages(string(roomID), "", "", 'b', 13, "")
-		if err != nil {
-			log.Println(err)
-			log.Println(err)
-			log.Println(err)
-		}
-		events = msg.Chunk
+	if relationships != nil && len(relationships.Events) > 0 {
+		events = relationships.Events
 	}
 
 	posts := c.ProcessMessages(events, state, us)
-	log.Println("messages length si ", len(events))
-	log.Println("messages length si ", len(posts))
 
 	isPage := c.IsPage(state)
 
@@ -526,7 +509,6 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 			ID:        messagesFrom,
 			Children:  children,
 			Pages:     pages,
-			Archaic:   archaic,
 		},
 		Posts:         posts,
 		RoomState:     state,
