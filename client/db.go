@@ -358,3 +358,15 @@ func (c *Client) UnsafeUpdateEmail(ctx context.Context, username, email string) 
 
 	return nil
 }
+
+func (c *Client) UnsafeSetAvatar(ctx context.Context, username, avatarURL string) error {
+
+	log.Println("updating avatar", username, avatarURL)
+
+	_, err := c.UserAPIAccountsDB.Exec(`UPDATE account_profiles SET avatar_url=$1 where localpart=$2`, avatarURL, username)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

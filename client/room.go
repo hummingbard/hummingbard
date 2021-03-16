@@ -413,25 +413,28 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			}
 		}
 
-		if len(pay.Info.Avatar) > 0 {
-			_, err = matrix.SendStateEvent(pay.RoomID, "m.room.avatar", "", map[string]interface{}{
-				"url": pay.Info.Avatar,
-			})
+		_, err = matrix.SendStateEvent(pay.RoomID, "m.room.avatar", "", map[string]interface{}{
+			"url": pay.Info.Avatar,
+		})
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		if owner {
+
+			av := pay.Info.Avatar
+			if len(pay.Info.Avatar) == 0 {
+				av = "mxc://"
+			}
+
+			err = matrix.SetAvatarURL(av)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, err.Error(), 400)
 				return
 			}
-			if owner {
-
-				err = matrix.SetAvatarURL(pay.Info.Avatar)
-				if err != nil {
-					log.Println(err)
-					http.Error(w, err.Error(), 400)
-					return
-				}
-				c.UpdateAvatar(r, pay.Info.Avatar)
-			}
+			c.UpdateAvatar(r, pay.Info.Avatar)
 		}
 
 		ff.Updated = true
