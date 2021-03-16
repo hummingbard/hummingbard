@@ -175,8 +175,7 @@ func (c *Client) SendInvitationEmail(email string, user *User) error {
 
 	body := fmt.Sprintf(`
 		Your friend <a href="https://%s/%s">%s</a> sent you an invite to join Hummingbard. Follow the link below to create your Hummingbard account.<br><br>
-		%s<br><br>
-		If you did not request a password reset, you can safely ignore this email.
+		%s
 	`, c.Config.Client.Domain, username, username, link)
 
 	log.Println("waht is body", body)
