@@ -129,14 +129,11 @@ func (c *Client) GuestsOnly(h http.Handler) http.Handler {
 		token, ok := s.Values["access_token"].(string)
 
 		if ok && len(token) > 0 {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
-		}
-
-		userid, err := c.Store.Get(token).Result()
-		if err == nil || userid != "" {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
-			return
+			userid, err := c.Store.Get(token).Result()
+			if err == nil && userid != "" {
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+				return
+			}
 		}
 
 		h.ServeHTTP(w, r)
