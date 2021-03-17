@@ -609,7 +609,7 @@ func (c *Client) ValidateSignup() http.HandlerFunc {
 			Visibility:    "public",
 			Preset:        "public_chat",
 			RoomAliasName: fmt.Sprintf(`@%s`, username),
-			Name:          fmt.Sprintf(`%s's Profile`, username),
+			Name:          fmt.Sprintf(`%s`, username),
 			Topic:         fmt.Sprintf(`This is @%s's hummingbard profile.`, username),
 			CreationContent: map[string]interface{}{
 				"m.federate": true,

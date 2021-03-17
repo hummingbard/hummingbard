@@ -357,40 +357,35 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			owner = true
 		}
 
-		if len(pay.Info.Title) > 0 {
-
-			_, err = matrix.SendStateEvent(pay.RoomID, "m.room.name", "", map[string]interface{}{
-				"name": pay.Info.Title,
-			})
-			if err != nil {
-				log.Println(err)
-				http.Error(w, err.Error(), 400)
-				return
-			}
-
-			if owner {
-
-				err = matrix.SetDisplayName(pay.Info.Title)
-				if err != nil {
-					log.Println(err)
-					log.Println(err)
-					log.Println(err)
-					http.Error(w, err.Error(), 400)
-					return
-				}
-				c.UpdateDisplayName(r, pay.Info.Title)
-			}
+		_, err = matrix.SendStateEvent(pay.RoomID, "m.room.name", "", map[string]interface{}{
+			"name": pay.Info.Title,
+		})
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
 		}
 
-		if len(pay.Info.About) > 0 {
-			_, err = matrix.SendStateEvent(pay.RoomID, "m.room.topic", "", map[string]interface{}{
-				"topic": pay.Info.About,
-			})
+		if owner {
+
+			err = matrix.SetDisplayName(pay.Info.Title)
 			if err != nil {
+				log.Println(err)
+				log.Println(err)
 				log.Println(err)
 				http.Error(w, err.Error(), 400)
 				return
 			}
+			c.UpdateDisplayName(r, pay.Info.Title)
+		}
+
+		_, err = matrix.SendStateEvent(pay.RoomID, "m.room.topic", "", map[string]interface{}{
+			"topic": pay.Info.About,
+		})
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
 		}
 
 		_, err = matrix.SendStateEvent(pay.RoomID, "com.hummingbard.room.style", "", map[string]interface{}{
@@ -402,33 +397,37 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			return
 		}
 
-		if len(pay.Appearance.Header) > 0 {
-			_, err = matrix.SendStateEvent(pay.RoomID, "com.hummingbard.room.header", "", map[string]interface{}{
-				"url": pay.Appearance.Header,
-			})
-			if err != nil {
-				log.Println(err)
-				http.Error(w, err.Error(), 400)
-				return
-			}
+		header := pay.Appearance.Header
+		if len(pay.Appearance.Header) == 0 {
+			header = ""
 		}
 
-		_, err = matrix.SendStateEvent(pay.RoomID, "m.room.avatar", "", map[string]interface{}{
-			"url": pay.Info.Avatar,
+		_, err = matrix.SendStateEvent(pay.RoomID, "com.hummingbard.room.header", "", map[string]interface{}{
+			"url": header,
 		})
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), 400)
 			return
 		}
+
+		avatar := pay.Info.Avatar
+		if len(pay.Info.Avatar) == 0 {
+			avatar = ""
+		}
+
+		_, err = matrix.SendStateEvent(pay.RoomID, "m.room.avatar", "", map[string]interface{}{
+			"url": avatar,
+		})
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
 		if owner {
 
-			av := pay.Info.Avatar
-			if len(pay.Info.Avatar) == 0 {
-				av = "mxc://"
-			}
-
-			err = matrix.SetAvatarURL(av)
+			err = matrix.SetAvatarURL(avatar)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, err.Error(), 400)

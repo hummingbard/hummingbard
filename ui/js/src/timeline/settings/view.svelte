@@ -91,25 +91,15 @@ async function saveState() {
     let css = $state?.filter(x => x.type == 'com.hummingbard.room.style')[0]?.content["css"]
     let header = $state?.filter(x => x.type == 'com.hummingbard.room.header')[0]?.content["url"]
 
-  if(title != $settings.info.title) {
     data.info.title = $settings.info.title
-  }
 
-  if(about != $settings.info.about) {
     data.info.about = $settings.info.about
-  }
 
-  if(avatar != $settings.info.avatar) {
     data.info.avatar = $settings.info.avatar
-  }
 
-  if(header != $settings.appearance.header) {
     data.appearance.header = $settings.appearance.header
-  }
 
-  if(css != $settings.appearance.css) {
     data.appearance.css = $settings.appearance.css
-  }
 
   if(!data.info && !data.appearance) {
     console.log("nothing to upadte")
