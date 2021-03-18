@@ -618,16 +618,18 @@ func (c *Client) ReactToPost() http.HandlerFunc {
 
 		matrix, err := gomatrix.NewClient(serverName, user.UserID, user.MatrixAccessToken)
 
-		_, err = matrix.SendStateEvent(pay.RoomID, "m.reaction", "", map[string]interface{}{
-			"room_id": pay.RoomID,
-			"m.relates_to": map[string]string{
-				"event_id": pay.EventID,
-				"key":      pay.Key,
-				"rel_type": "m.annotation",
-			},
-		})
+		//create post in new thread rroom
+		npe := gomatrix.ReactToPostEvent{
+			RoomID:  pay.RoomID,
+			EventID: pay.EventID,
+			Key:     pay.Key,
+		}
+
+		_, err = matrix.ReactToPost(&npe)
 		if err != nil {
 			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
 		}
 
 		ff := Response{

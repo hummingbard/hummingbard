@@ -259,10 +259,10 @@ id={post.short_id}
       {#if !embed}
       <div class="post-tools flex">
           {#if !nested}
-          <div class="perma-link pointer ml3"
+          <div class="perma-link ml3"
               class:gr-center={reply || nestedReply}>
               <a class="" href={permalink}>
-                  <svg class="p-t-f" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.604 1h4.146a.25.25 0 01.25.25v4.146a.25.25 0 01-.427.177L13.03 4.03 9.28 7.78a.75.75 0 01-1.06-1.06l3.75-3.75-1.543-1.543A.25.25 0 0110.604 1zM3.75 2A1.75 1.75 0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 12.25v-3.5a.75.75 0 00-1.5 0v3.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-8.5a.25.25 0 01.25-.25h3.5a.75.75 0 000-1.5h-3.5z"></path></svg>
+                  <svg class="p-t-f pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M10.604 1h4.146a.25.25 0 01.25.25v4.146a.25.25 0 01-.427.177L13.03 4.03 9.28 7.78a.75.75 0 01-1.06-1.06l3.75-3.75-1.543-1.543A.25.25 0 0110.604 1zM3.75 2A1.75 1.75 0 002 3.75v8.5c0 .966.784 1.75 1.75 1.75h8.5A1.75 1.75 0 0014 12.25v-3.5a.75.75 0 00-1.5 0v3.5a.25.25 0 01-.25.25h-8.5a.25.25 0 01-.25-.25v-8.5a.25.25 0 01.25-.25h3.5a.75.75 0 000-1.5h-3.5z"></path></svg>
               </a>
           </div>
           {/if}
@@ -332,13 +332,15 @@ id={post.short_id}
         {/if}
 
         {#if !reply && !nested && !nestedReply}
-            {#if post.total_replies > 0}
                 <div class="" class:mt3={mediaExists}>
                   <a class="" href="{permalink}">
+                    {#if post.total_replies > 0}
                       <span class="small primary hov-un">{post.total_replies} {post.total_replies > 1 ? 'Replies' : 'Reply'}</span>
+                    {:else}
+                      <span class="small primary hov-un">Reply</span>
+                    {/if}
                   </a>
               </div>
-            {/if}
         {/if}
 
     </div>
