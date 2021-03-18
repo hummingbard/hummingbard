@@ -47,7 +47,7 @@ func NewSession(sec string) *sessions.CookieStore {
 	s := sessions.NewCookieStore([]byte(sec))
 	s.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   0,
+		MaxAge:   86400 * 365,
 		HttpOnly: false,
 	}
 	return s
