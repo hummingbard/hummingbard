@@ -1,5 +1,9 @@
 #!/bin/bash
 
+set -e
+cd "$(dirname "$0")"
+
+rm -rf static/css/*.css
 echo "Minifying CSS files..."
 cd ui/css
 for i in $( find . -type f -name '*\.css' ); do

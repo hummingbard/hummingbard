@@ -13,6 +13,12 @@ USER node
 RUN npm i
 RUN npm build
 
+WORKDIR /home/node/app
+RUN mkdir ~/.npm-global
+RUN npm config set prefix '~/.npm-global'
+RUN export PATH=~/.npm-global/bin:$PATH; npm i -g uglifycss
+RUN export PATH=~/.npm-global/bin:$PATH; make build_css
+
 # TODO: Use golang alpine
 FROM golang:1.14
 
@@ -30,7 +36,7 @@ RUN chown -R go /go/src/app/
 USER go
 
 RUN go get -d -v ./...
-RUN make
+RUN make build_go
 
 RUN curl 'https://matrix-client.matrix.org:443/_matrix/client/r0/publicRooms?limit=500' > bigrooms.json
 
