@@ -7,4 +7,5 @@ vendorbuild:
 	go build -mod=vendor -o bin/hummingbard cmd/hummingbard/main.go
 clean: 
 	rm -f bin/hummingbard
-	rm -f static/css/*
+	rm -rf static/css
+	mkdir static/css

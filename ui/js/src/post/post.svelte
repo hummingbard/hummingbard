@@ -6,6 +6,7 @@ import Link from './link/link.svelte'
 import Attachment from './attachment/attachment.svelte'
 import Menu from './menu/menu.svelte'
 import Content from './content/content.svelte'
+import React from './react/react.svelte'
 import {addPosts} from '../timeline/store.js'
 import { createEventDispatcher } from 'svelte'
 const dispatch = createEventDispatcher();
@@ -188,6 +189,7 @@ $: lastPi = pi[pi.length - 1]
 
 $: replyPermalinked = lastPi === post.event_id
 
+$: showReact = window.timeline?.userFeed || window.timeline?.member
 </script>
 
 <div class="po-co fl-co-o" 
@@ -258,6 +260,9 @@ id={post.short_id}
 
       {#if !embed}
       <div class="post-tools flex">
+          {#if showReact}
+              <React id={post.event_id}/>
+          {/if}
           {#if !nested}
           <div class="perma-link ml3"
               class:gr-center={reply || nestedReply}>
