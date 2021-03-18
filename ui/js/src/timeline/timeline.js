@@ -242,6 +242,21 @@ if(shares && authenticated) {
   })
 }
 
+let reacts = document.querySelectorAll(`.react`)
+if(reacts && authenticated) {
+  import('../post/react/react.svelte').then(res => {
+    reacts.forEach(react => {
+      new res.default({
+          target: react,
+          props: {
+            id: react.dataset.id,
+          },
+          hydrate: true
+      });
+    })
+  })
+}
+
 let menus = document.querySelectorAll(`.post-menu`)
 if(menus && authenticated) {
   import('../post/menu/menu.svelte').then(res => {

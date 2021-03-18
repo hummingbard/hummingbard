@@ -751,4 +751,7 @@ transition:fade="{{duration: 33}}">
 .reply {
   border-bottom: 1px solid var(--primary-grayish);
 }
+  textarea, input {
+      width: 100%;
+  }
 </style>

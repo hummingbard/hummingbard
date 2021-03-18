@@ -83,7 +83,6 @@ function loadMore() {
         loadPost()
     }
       if(res?.last_event) {
-          console.log("set last to", res?.last_event)
           last = res.last_event
       }
       if(res?.posts?.length > 0) {

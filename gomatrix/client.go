@@ -734,6 +734,28 @@ func (cli *Client) CreatePost(p *CreatePostEvent) (*RespSendEvent, error) {
 	return cli.SendMessageEvent(p.RoomID, "com.hummingbard.post", post)
 }
 
+type ReactToPostEvent struct {
+	RoomID  string `json:"room_id"`
+	EventID string `json:"event_id"`
+	Key     string `json:"key"`
+}
+
+func (cli *Client) ReactToPost(p *ReactToPostEvent) (*RespSendEvent, error) {
+
+	post := Post{
+		MsgType:       "m.reaction",
+		Body:          p.Key,
+		FormattedBody: p.Key,
+	}
+
+	post.MRelationship = map[string]string{
+		"rel_type": "m.reference",
+		"event_id": p.EventID,
+	}
+
+	return cli.SendMessageEvent(p.RoomID, "com.hummingbard.post", post)
+}
+
 // SendImage sends an m.room.message event into the given room with a msgtype of m.image
 // See https://matrix.org/docs/spec/client_server/r0.2.0.html#m-image
 func (cli *Client) SendImage(roomID, body, url string) (*RespSendEvent, error) {

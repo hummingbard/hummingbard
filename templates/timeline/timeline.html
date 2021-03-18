@@ -314,9 +314,10 @@
                   {{$rpth := .Room.Path}}
                   {{$rid := .Room.ID}}
                   {{$liu := .LoggedInUser}}
+                  {{$mem := .IsMember}}
                   {{range $idx, $post := .Posts}}
                     {{if and  (not $post.Redacted)}}
-                      {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "RoomID" $rid}}
+                      {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "RoomID" $rid "IsMember" $mem}}
                     {{end}}
                 {{end}}
 

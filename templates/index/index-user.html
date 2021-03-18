@@ -41,7 +41,7 @@
               {{$hms := .HomeServerURL}}
               {{range $idx, $post := .Posts}}
                 {{if and (eq $post.Type "com.hummingbard.post") (not $post.Redacted)}}
-                  {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "UserFeed" true}}
+                  {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "UserFeed" true "IsMember" true}}
                 {{end}}
               {{end}}
             </div>
