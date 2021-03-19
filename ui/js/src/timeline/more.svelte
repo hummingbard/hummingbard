@@ -37,6 +37,10 @@ async function fetchFollowing() {
         end: last,
     }
 
+    if(window.timeline?.showAll) {
+        data.all = true
+    }
+
     if(window.timeline.userFeed) {
         console.log(feed)
         endpoint = `/feed/fetch`
@@ -88,7 +92,7 @@ function loadMore() {
       if(res?.posts?.length > 0) {
           addPosts(res.posts)
           res.posts.forEach(post => {
-              if(post.type == `com.hummingbard.post` && !post.redacted) {
+              if(post.type == `com.hummingbard.post` || post.type == `m.room.message` && !post.redacted) {
                 posts = [...posts, post];
               }
           })

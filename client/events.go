@@ -111,7 +111,7 @@ func (c *Client) SortReplies(events []gomatrix.Event, rootID string, s string) [
 	return items
 }
 
-func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event, user *User) []gomatrix.Event {
+func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event, user *User, showAll bool) []gomatrix.Event {
 
 	members := []*gomatrix.Event{}
 
@@ -125,8 +125,14 @@ func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event,
 
 	for i, _ := range resp {
 
-		if resp[i].Content["m.relationship"] == nil {
+		if !showAll && resp[i].Content["m.relationship"] == nil {
 			continue
+		}
+		if showAll {
+			reply, ok := resp[i].Content["reply"].(bool)
+			if ok && reply {
+				continue
+			}
 		}
 
 		c.ProcessEvent(&resp[i], user)
@@ -159,9 +165,16 @@ func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event,
 			}
 		}
 
-		if resp[i].Type == "com.hummingbard.post" {
-			events = append(events, resp[i])
+		if !showAll {
+			if resp[i].Type == "com.hummingbard.post" {
+				events = append(events, resp[i])
+			}
+		} else {
+			if resp[i].Type == "com.hummingbard.post" || resp[i].Type == "m.room.message" {
+				events = append(events, resp[i])
+			}
 		}
+
 	}
 
 	sort.Slice(events, func(i, j int) bool { return events[i].Time.After(events[j].Time) })

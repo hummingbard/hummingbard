@@ -640,6 +640,7 @@ func (cli *Client) CreatePost(p *CreatePostEvent) (*RespSendEvent, error) {
 		Images:        p.Images,
 		Attachments:   p.Attachments,
 		NSFW:          p.NSFW,
+		Reply:         p.Reply,
 	}
 
 	if p.IsArticle && len(p.Title) > 0 {

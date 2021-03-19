@@ -251,11 +251,6 @@ func (c *Client) UserCollectionsItem(w http.ResponseWriter, r *http.Request) {
 	//check if room exists
 	var ra *gomatrix.RespAliasResolve
 
-	log.Println("what is room?", room)
-	log.Println("what is room?", room)
-	log.Println("what is room?", room)
-	log.Println("what is room?", room)
-
 	ra, err = cli.ResolveAlias(room)
 	if err != nil {
 		log.Println(err)
@@ -288,7 +283,7 @@ func (c *Client) UserCollectionsItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	events := []gomatrix.Event{*event}
-	pr := c.ProcessMessages(events, state, us)
+	pr := c.ProcessMessages(events, state, us, false)
 	//c.ProcessEvent(event, us)
 	if len(pr) == 0 {
 		c.NotFound(w, r)
@@ -375,7 +370,7 @@ func (c *Client) UserCollectionsItem(w http.ResponseWriter, r *http.Request) {
 		},
 		RoomState: state,
 	}
-	processed := c.ProcessMessages(relationships, state, us)
+	processed := c.ProcessMessages(relationships, state, us, false)
 
 	t.RootEvent = path
 

@@ -81,6 +81,7 @@ type TimelinePage struct {
 	LastEvent        interface{} `json:"last_event"`
 	Depth            int         `json:"depth"`
 	Sort             string      `json:"sort"`
+	ShowAll          bool        `json:"show_all"`
 }
 
 func (c *Client) BuildSpaceChildren(roomID string, spaces *gomatrix.RespSpaces, page bool, profile bool) []*ChildRoom {
@@ -380,38 +381,55 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	query := r.URL.Query()
+	view := query.Get("view")
+	showAll := view == "all"
+
 	events := []gomatrix.Event{}
+	var lastEvent interface{}
 
-	rc := c.RoomCreateEventFromState(state)
+	if !showAll {
+		rc := c.RoomCreateEventFromState(state)
 
-	cli.Prefix = "/_matrix/client/"
+		cli.Prefix = "/_matrix/client/"
 
-	opts := map[string]interface{}{
-		"event_id":         rc,
-		"room_id":          string(ra.RoomID),
-		"depth_first":      false,
-		"recent_first":     true,
-		"include_parent":   false,
-		"include_children": true,
-		"direction":        "down",
-		"limit":            14,
-		"max_depth":        0,
-		"max_breadth":      0,
-		"last_event":       "0",
+		opts := map[string]interface{}{
+			"event_id":         rc,
+			"room_id":          string(ra.RoomID),
+			"depth_first":      false,
+			"recent_first":     true,
+			"include_parent":   false,
+			"include_children": true,
+			"direction":        "down",
+			"limit":            14,
+			"max_depth":        0,
+			"max_breadth":      0,
+			"last_event":       "0",
+		}
+
+		relationships, err := cli.GetRelationships(opts)
+		if err != nil {
+			log.Println(err)
+		}
+
+		cli.Prefix = "/_matrix/client/r0"
+		if relationships != nil && len(relationships.Events) > 0 {
+			events = relationships.Events
+		}
+		lastEvent = events[len(events)-1].Timestamp
+
+	} else {
+		msg, err := cli.Messages(string(roomID), "", "", 'b', 73, "")
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		events = msg.Chunk
+		lastEvent = msg.End
 	}
 
-	relationships, err := cli.GetRelationships(opts)
-	if err != nil {
-		log.Println(err)
-	}
-
-	cli.Prefix = "/_matrix/client/r0"
-
-	if relationships != nil && len(relationships.Events) > 0 {
-		events = relationships.Events
-	}
-
-	posts := c.ProcessMessages(events, state, us)
+	posts := c.ProcessMessages(events, state, us, showAll)
 
 	isPage := c.IsPage(state)
 
@@ -514,10 +532,8 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 		RoomState:     state,
 		IsUserProfile: profileRoom,
 		IsFederated:   fed,
-	}
-
-	if len(events) > 0 {
-		t.LastEvent = events[len(events)-1].Timestamp
+		ShowAll:       showAll,
+		LastEvent:     lastEvent,
 	}
 
 	if c.Config.Mode == "development" {
@@ -751,7 +767,7 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 	}
 
 	events := []gomatrix.Event{*event}
-	pr := c.ProcessMessages(events, state, us)
+	pr := c.ProcessMessages(events, state, us, false)
 	//c.ProcessEvent(event, us)
 	if len(pr) == 0 {
 		c.NotFound(w, r)
@@ -846,7 +862,7 @@ func (c *Client) PermalinkTimeline(w http.ResponseWriter, r *http.Request, slugg
 		IsUserProfile: profileRoom,
 		IsFederated:   fed,
 	}
-	processed := c.ProcessMessages(relationships, state, us)
+	processed := c.ProcessMessages(relationships, state, us, false)
 
 	t.RootEvent = path
 
@@ -1040,7 +1056,7 @@ func (c *Client) FetchReplies() http.HandlerFunc {
 		ff := Response{}
 
 		if rel != nil {
-			processed := c.ProcessMessages(rel.Events, state, user)
+			processed := c.ProcessMessages(rel.Events, state, user, false)
 			replies := c.SortReplies(processed, pay.EventID, sort)
 			ff.Unsorted = processed
 			ff.Replies = replies
@@ -1072,6 +1088,7 @@ func (c *Client) GetMoreMessages() http.HandlerFunc {
 			End       interface{} `json:"end"`
 			Permalink bool        `json:"permalink"`
 			Public    bool        `json:"public"`
+			All       bool        `json:"all"`
 		}
 
 		var pay payload
@@ -1109,50 +1126,64 @@ func (c *Client) GetMoreMessages() http.HandlerFunc {
 			http.Error(w, err.Error(), 400)
 			return
 		}
-		rc := c.RoomCreateEventFromState(state)
-
-		cli.Prefix = "/_matrix/client/"
-
-		opts := map[string]interface{}{
-			"event_id":         rc,
-			"room_id":          string(pay.Id),
-			"depth_first":      false,
-			"recent_first":     true,
-			"include_parent":   false,
-			"include_children": true,
-			"direction":        "down",
-			"limit":            5,
-			"max_depth":        0,
-			"max_breadth":      0,
-		}
-
-		if ev, ok := pay.End.(float64); ok {
-			le := strconv.FormatInt(int64(ev), 10)
-			opts["last_event"] = le
-		}
 
 		events := []gomatrix.Event{}
-
-		relationships, err := cli.GetRelationships(opts)
-		if err != nil {
-			log.Println(err)
-			http.Error(w, err.Error(), 400)
-			return
-		}
-		cli.Prefix = "/_matrix/client/r0"
-
 		var lastEvent interface{}
 
-		lastEvent = relationships.Events[len(relationships.Events)-1].Timestamp
+		if !pay.All {
+			rc := c.RoomCreateEventFromState(state)
 
-		events = relationships.Events
+			cli.Prefix = "/_matrix/client/"
+
+			opts := map[string]interface{}{
+				"event_id":         rc,
+				"room_id":          string(pay.Id),
+				"depth_first":      false,
+				"recent_first":     true,
+				"include_parent":   false,
+				"include_children": true,
+				"direction":        "down",
+				"limit":            5,
+				"max_depth":        0,
+				"max_breadth":      0,
+			}
+
+			if ev, ok := pay.End.(float64); ok {
+				le := strconv.FormatInt(int64(ev), 10)
+				opts["last_event"] = le
+			}
+
+			relationships, err := cli.GetRelationships(opts)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, err.Error(), 400)
+				return
+			}
+			cli.Prefix = "/_matrix/client/r0"
+
+			lastEvent = relationships.Events[len(relationships.Events)-1].Timestamp
+
+			events = relationships.Events
+
+		} else {
+
+			if ev, ok := pay.End.(string); ok {
+				msg, err := cli.Messages(string(pay.Id), ev, "", 'b', 73, "")
+				if err != nil {
+					log.Println(err)
+					http.Error(w, err.Error(), 400)
+					return
+				}
+				lastEvent = msg.End
+				events = msg.Chunk
+			}
+		}
 
 		if pay.Public {
 
 			if ev, ok := pay.End.(string); ok {
 
-				fil := `{types:["com.hummingbard.post"]}`
-				msg, err := cli.Messages(string(pay.Id), ev, "", 'b', 13, fil)
+				msg, err := cli.Messages(string(pay.Id), ev, "", 'b', 13, "")
 				if err != nil {
 					log.Println(err)
 					http.Error(w, err.Error(), 400)
@@ -1164,7 +1195,7 @@ func (c *Client) GetMoreMessages() http.HandlerFunc {
 		}
 
 		ff := Response{
-			Posts:     c.ProcessMessages(events, state, user),
+			Posts:     c.ProcessMessages(events, state, user, pay.All),
 			LastEvent: lastEvent,
 		}
 

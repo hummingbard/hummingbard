@@ -65,6 +65,7 @@ type Post struct {
 	Body            string            `json:"body"`
 	FormattedBody   string            `json:"formatted_body"`
 	Format          string            `json:"format"`
+	Reply           bool              `json:"reply"`
 	Links           []Link            `json:"links,omitempty"`
 	Attachments     []Attachment      `json:"attachments,omitempty"`
 	Images          []Image           `json:"images,omitempty"`
@@ -82,8 +83,8 @@ type Post struct {
 	Anonymous       bool              `json:"anonymous,omitempty"`
 	SharedPost      interface{}       `json:"shared_post,omitempty"`
 	Article         *Article          `json:"com.hummingbard.article,omitempty"`
-	ShareReply      *bool         `json:"share_reply"`
-	ReplyPermalink  *string       `json:"reply_permalink"`
+	ShareReply      *bool             `json:"share_reply"`
+	ReplyPermalink  *string           `json:"reply_permalink"`
 }
 
 type Article struct {

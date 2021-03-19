@@ -78,7 +78,7 @@ func (c *Client) PublicFeed() http.HandlerFunc {
 			c.Cache.Events.Set(roomID, pev, 1)
 		}
 
-		t.Posts = c.ProcessMessages(pev.Events, state, us)
+		t.Posts = c.ProcessMessages(pev.Events, state, us, false)
 		t.LastEvent = pev.LastEvent
 
 		nonce := secure.CSPNonce(r.Context())
@@ -207,7 +207,7 @@ func (c *Client) IndexUser(w http.ResponseWriter, r *http.Request) {
 			}
 			if relationships != nil && len(relationships.Events) > 0 {
 
-				processed := c.ProcessMessages(relationships.Events, state, user)
+				processed := c.ProcessMessages(relationships.Events, state, user, false)
 				posts = append(posts, processed...)
 				lastEvent := relationships.Events[len(relationships.Events)-1].Timestamp
 				feedItems = append(feedItems, &IndexFeed{
@@ -414,7 +414,7 @@ func (c *Client) GetFeedEvents() http.HandlerFunc {
 				}
 				if relationships != nil && len(relationships.Events) > 0 {
 
-					processed := c.ProcessMessages(relationships.Events, state, user)
+					processed := c.ProcessMessages(relationships.Events, state, user, false)
 					posts = append(posts, processed...)
 					lastEvent := relationships.Events[len(relationships.Events)-1].Timestamp
 					feedItems = append(feedItems, &IndexFeed{

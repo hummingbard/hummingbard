@@ -70,6 +70,7 @@ $: mediaExists = post?.content?.images?.length > 0 ||
     post?.content?.attachments?.length > 0 ||
     post?.content?.links?.length > 0 
 
+$: im = post.type == `m.room.message`
 
 let loadingReplies = false;
 
@@ -261,9 +262,11 @@ id={post.short_id}
       {#if !embed}
       <div class="post-tools flex">
           {#if showReact}
+              <div class="">
               <React id={post.event_id}/>
+              </div>
           {/if}
-          {#if !nested}
+          {#if !nested && !im}
           <div class="perma-link ml3"
               class:gr-center={reply || nestedReply}>
               <a class="" href={permalink}>
@@ -336,13 +339,13 @@ id={post.short_id}
 
         {/if}
 
-        {#if !reply && !nested && !nestedReply}
+        {#if !reply && !nested && !nestedReply && !im}
                 <div class="" class:mt3={mediaExists}>
                   <a class="" href="{permalink}">
                     {#if post.total_replies > 0}
-                      <span class="small primary hov-un">{post.total_replies} {post.total_replies > 1 ? 'Replies' : 'Reply'}</span>
+                      <span class="small o-80 hov-un">{post.total_replies} {post.total_replies > 1 ? 'Replies' : 'Reply'}</span>
                     {:else}
-                      <span class="small primary hov-un">Reply</span>
+                      <span class="small o-80 hov-un">Reply</span>
                     {/if}
                   </a>
               </div>

@@ -22,13 +22,13 @@ $: profile = window.timeline?.profile
 
   {#if !isArticle}
     <div class="gr-center">
-      <Link store={store} on:addLink/>
-    </div>
-    <div class="gr-center ml3">
       <Image store={store} on:addImage/>
     </div>
     <div class="gr-center ml3">
       <Attachment store={store} on:addAttachment/>
+    </div>
+    <div class="gr-center ml3">
+      <Link store={store} on:addLink/>
     </div>
     <div class="gr-center ml3">
       <NSFW store={store} on:toggleNSFW/>

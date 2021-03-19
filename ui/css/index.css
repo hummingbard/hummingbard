@@ -155,6 +155,7 @@ a:link, a:visited {
 .sidebar {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
+    word-break: break-word;
 }
 
 .sidebar a:link, .sidebar a:visited {
