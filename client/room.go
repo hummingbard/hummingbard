@@ -388,8 +388,16 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			return
 		}
 
+		css := pay.Appearance.CSS
+		sanitized, err := StrictSanitizeHTML(css)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
 		_, err = matrix.SendStateEvent(pay.RoomID, "com.hummingbard.room.style", "", map[string]interface{}{
-			"css": pay.Appearance.CSS,
+			"css": sanitized,
 		})
 		if err != nil {
 			log.Println(err)

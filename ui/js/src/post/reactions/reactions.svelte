@@ -154,9 +154,11 @@ async function redactReaction(id) {
 
 <div class="flex">
 
+    {#if isMember}
     <div class="flex mr3 gr-center">
         <React id={id} on:reacted={reacted}/>
     </div>
+    {/if}
 
     <div class="flex flex-wrap">
     {#each items as item (item.key)}

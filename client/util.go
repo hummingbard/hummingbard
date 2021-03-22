@@ -194,6 +194,13 @@ func SanitizeHTML(x string) (string, error) {
 	return safe, nil
 }
 
+func StrictSanitizeHTML(x string) (string, error) {
+	p := bluemonday.StrictPolicy()
+	safe := p.Sanitize(x)
+	return safe, nil
+}
+
+
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const NumberBytes = "0123456789"
 const (

@@ -9,7 +9,9 @@ export let id;
 $: post = getPostById(id)
 
 onMount(() => {
+    if(isMember) {
       load()
+    }
 })
 
 let menu;
