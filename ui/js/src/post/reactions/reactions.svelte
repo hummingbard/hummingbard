@@ -33,26 +33,12 @@ function categorize(reactions) {
     return items
 }
 
+$: isMember = window.timeline?.member
 
 function reacted(e) {
-    console.log(e.detail)
-    /*
-    items.forEach(reaction => {
-        let match = reaction.key == e.detail
-        let ind = reaction.senders.findIndex(x => x.sender == identity.user_id)
-        if(match && (ind != -1)) {
-            reaction.senders.splice(ind, 1)
-            items = items
-        }
-        if(reaction.senders.length == 0) {
-            let ind = items.findIndex(x => x.key = e.detail)
-            if(ind != -1) {
-                items.splice(ind, 1)
-                items = items
-            }
-        }
-    })
-    */
+    if(!isMember) {
+        return
+    }
     let ind = items.findIndex(x => x.key == e.detail)
     if(ind == -1) {
         sendReaction(e.detail).then(res => {

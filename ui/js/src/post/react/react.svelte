@@ -60,10 +60,14 @@ async function sendReaction(key) {
     return Promise.resolve(ret)
 }
 
+$: isMember = window.timeline?.member
+
 function react(e) {
     let key = e.target.dataset.id
     menu.hide()
-    dispatch('reacted', key)
+    if(isMember) {
+        dispatch('reacted', key)
+    }
 }
 
 let icon;

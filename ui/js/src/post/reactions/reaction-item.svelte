@@ -9,7 +9,9 @@ export let id;
 $: post = getPostById(id)
 
 onMount(() => {
+    if(isMember) {
       load()
+    }
 })
 
 let menu;
@@ -34,7 +36,9 @@ function load() {
 }
 
 function react() {
-    dispatch('reacted', item.key)
+    if(isMember) {
+        dispatch('reacted', item.key)
+    }
 }
 
 $: reacted = item.senders.filter(x => x.sender == identity.user_id).length > 0
@@ -46,6 +50,8 @@ function formatUsername(username) {
     }
     return username
 }
+
+$: isMember = window.timeline?.member
 
 </script>
 
