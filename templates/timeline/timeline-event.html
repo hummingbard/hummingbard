@@ -372,8 +372,8 @@ id="{{.Event.ShortID}}">
       {{if or $lnk $img $att}}{{$mrg = true}}{{end}}
 
       {{if not $im}}
-      <div class="flex" style="min-height: 26px;">
-        <div class="{{if $mrg}}mt3{{end}} mr3 gr-center">
+      <div class="{{if $mrg}}mt3{{end}} flex" style="min-height: 26px;">
+        <div class="mr3 gr-center">
             {{if .UserFeed}}
             <a class="" href="/{{index .Event.Content "room_path"}}/{{index .Event.ID}}">
             {{else}}

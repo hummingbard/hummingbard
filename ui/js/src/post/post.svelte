@@ -335,8 +335,8 @@ id={post.short_id}
         {/if}
 
         {#if !reply && !nested && !nestedReply && !im}
-          <div class="flex" style="min-height: 26px;">
-            <div class="mr3 gr-center" class:mt3={mediaExists}>
+          <div class="flex" style="min-height: 26px;" class:mt3={mediaExists}>
+            <div class="mr3 gr-center">
                   <a class="" href="{permalink}">
                     {#if post.total_replies > 0}
                       <span class="small o-80 hov-un">{post.total_replies} {post.total_replies > 1 ? 'Replies' : 'Reply'}</span>
