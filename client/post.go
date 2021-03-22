@@ -597,7 +597,8 @@ func (c *Client) ReactToPost() http.HandlerFunc {
 		log.Println("recieved payload ", pay)
 
 		type Response struct {
-			Reacted bool `json:"reacted"`
+			Reacted bool        `json:"reacted"`
+			Event   interface{} `json:"event"`
 		}
 
 		fu, us := c.FederationUser(user.UserID)
@@ -618,22 +619,46 @@ func (c *Client) ReactToPost() http.HandlerFunc {
 
 		matrix, err := gomatrix.NewClient(serverName, user.UserID, user.MatrixAccessToken)
 
-		//create post in new thread rroom
-		npe := gomatrix.ReactToPostEvent{
-			RoomID:  pay.RoomID,
-			EventID: pay.EventID,
-			Key:     pay.Key,
-		}
-
-		_, err = matrix.ReactToPost(&npe)
+		state, err := matrix.RoomState(pay.RoomID)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, err.Error(), 400)
 			return
 		}
 
+		rc := c.RoomCreateEventFromState(state)
+		if len(rc) == 0 {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		//create post in new thread rroom
+		npe := gomatrix.ReactToPostEvent{
+			RoomID:            pay.RoomID,
+			RoomCreateEventID: rc,
+			EventID:           pay.EventID,
+			Key:               pay.Key,
+		}
+
+		rtp, err := matrix.ReactToPost(&npe)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		event, err := matrix.RoomEvent(pay.RoomID, rtp.EventID)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		c.ProcessEvent(event, user)
+
 		ff := Response{
 			Reacted: true,
+			Event:   event,
 		}
 
 		js, err := json.Marshal(ff)

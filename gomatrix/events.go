@@ -29,6 +29,12 @@ type Event struct {
 	IsArticle    bool                   `json:"is_article"`
 	Replies      []*Event               `json:"replies"`
 	TotalReplies int                    `json:"total_replies"`
+	Reactions    *[]*Reaction           `json:"reactions"`
+}
+
+type Reaction struct {
+	Key    string `json:"key"`
+	Author Author `json:"author"`
 }
 
 type Author struct {
@@ -95,6 +101,11 @@ type Article struct {
 	CanonicalLink string `json:"canonical_link,omitempty"`
 	FeaturedImage *Image `json:"featured_image,omitempty"`
 	ContentURI    string `json:"content_uri"`
+}
+
+type ReqReaction struct {
+	MRelatesTo    map[string]string `json:"m_relates_to"`
+	MRelationship map[string]string `json:"m.relationship,omitempty"`
 }
 
 type Link struct {

@@ -317,7 +317,9 @@
                   {{$mem := .IsMember}}
                   {{range $idx, $post := .Posts}}
                     {{if and  (not $post.Redacted)}}
+                    {{if or (eq $post.Type "com.hummingbard.post") (eq $post.Type "m.room.message")}}
                       {{template "timeline-event" Map "Event" $post "HomeServerURL" $hms "RoomPath" $rpth "LoggedInUser" $liu "RoomID" $rid "IsMember" $mem}}
+                    {{end}}
                     {{end}}
                 {{end}}
 

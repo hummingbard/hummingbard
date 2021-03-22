@@ -401,7 +401,7 @@ func (c *Client) Timeline(w http.ResponseWriter, r *http.Request) {
 			"include_parent":   false,
 			"include_children": true,
 			"direction":        "down",
-			"limit":            14,
+			"limit":            50,
 			"max_depth":        0,
 			"max_breadth":      0,
 			"last_event":       "0",
@@ -1143,7 +1143,7 @@ func (c *Client) GetMoreMessages() http.HandlerFunc {
 				"include_parent":   false,
 				"include_children": true,
 				"direction":        "down",
-				"limit":            5,
+				"limit":            50,
 				"max_depth":        0,
 				"max_breadth":      0,
 			}

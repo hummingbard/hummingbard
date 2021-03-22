@@ -69,6 +69,10 @@ import { writable, derived } from 'svelte/store';
   }
 
 
+  let getPostReactions = (id) => {
+    return posts.filter(post => post.content?.m_relates_to?.event_id === id)
+  }
+
   let addingPS = (thing_id) => {
     return posts.filter(post => post.thing_id === thing_id)[0].adding_postscript
   }
@@ -104,6 +108,7 @@ import { writable, derived } from 'svelte/store';
     getPostByShortlink,
     getPostByShortId,
     getPostByThingId,
+    getPostReactions,
     queryState,
     postExists,
   }

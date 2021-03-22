@@ -14,7 +14,6 @@ func (c *Client) SortRelationships(events []gomatrix.Event, rootID string) []*go
 	items := []*gomatrix.Event{}
 
 	for i, _ := range events {
-		log.Println("type is", events[i].Type)
 		if events[i].ID == rootID {
 			items = append(items, &events[i])
 		}
@@ -25,6 +24,7 @@ func (c *Client) SortRelationships(events []gomatrix.Event, rootID string) []*go
 			}
 		}
 	}
+
 	var findReplies func(id string) []*gomatrix.Event
 
 	findReplies = func(id string) []*gomatrix.Event {
@@ -114,6 +114,7 @@ func (c *Client) SortReplies(events []gomatrix.Event, rootID string, s string) [
 func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event, user *User, showAll bool) []gomatrix.Event {
 
 	members := []*gomatrix.Event{}
+	reactions := []*gomatrix.Event{}
 
 	for _, m := range state {
 		if m.Type == "m.room.member" {
@@ -124,6 +125,11 @@ func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event,
 	events := []gomatrix.Event{}
 
 	for i, _ := range resp {
+		log.Println(resp[i].Type)
+
+		if resp[i].Type == "m.reaction" {
+			reactions = append(reactions, &resp[i])
+		}
 
 		if !showAll && resp[i].Content["m.relationship"] == nil {
 			continue
@@ -165,12 +171,14 @@ func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event,
 			}
 		}
 
+		log.Println("reactionsa re ", len(reactions))
+
 		if !showAll {
-			if resp[i].Type == "com.hummingbard.post" {
+			if resp[i].Type == "com.hummingbard.post" || resp[i].Type == "m.reaction" {
 				events = append(events, resp[i])
 			}
 		} else {
-			if resp[i].Type == "com.hummingbard.post" || resp[i].Type == "m.room.message" {
+			if resp[i].Type == "com.hummingbard.post" || resp[i].Type == "m.room.message" || resp[i].Type == "m.reaction" {
 				events = append(events, resp[i])
 			}
 		}

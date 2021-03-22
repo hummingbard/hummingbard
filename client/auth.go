@@ -947,11 +947,6 @@ func (c *Client) ValidatePasswordReset() http.HandlerFunc {
 
 		email := r.FormValue("email")
 
-		log.Println("what is email??", email)
-		log.Println("what is email??", email)
-		log.Println("what is email??", email)
-		log.Println("what is email??", email)
-
 		ctx := context.Background()
 		ctx, _ = context.WithTimeout(ctx, 7*time.Second)
 		exists, err := c.DoesUserExist(ctx, email)

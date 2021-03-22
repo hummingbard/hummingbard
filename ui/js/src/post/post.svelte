@@ -6,7 +6,7 @@ import Link from './link/link.svelte'
 import Attachment from './attachment/attachment.svelte'
 import Menu from './menu/menu.svelte'
 import Content from './content/content.svelte'
-import React from './react/react.svelte'
+import Reactions from './reactions/reactions.svelte'
 import {addPosts} from '../timeline/store.js'
 import { createEventDispatcher } from 'svelte'
 const dispatch = createEventDispatcher();
@@ -261,11 +261,6 @@ id={post.short_id}
 
       {#if !embed}
       <div class="post-tools flex">
-          {#if showReact}
-              <div class="">
-              <React id={post.event_id}/>
-              </div>
-          {/if}
           {#if !nested && !im}
           <div class="perma-link ml3"
               class:gr-center={reply || nestedReply}>
@@ -340,7 +335,8 @@ id={post.short_id}
         {/if}
 
         {#if !reply && !nested && !nestedReply && !im}
-                <div class="" class:mt3={mediaExists}>
+          <div class="flex" style="min-height: 26px;">
+            <div class="mr3 gr-center" class:mt3={mediaExists}>
                   <a class="" href="{permalink}">
                     {#if post.total_replies > 0}
                       <span class="small o-80 hov-un">{post.total_replies} {post.total_replies > 1 ? 'Replies' : 'Reply'}</span>
@@ -349,6 +345,8 @@ id={post.short_id}
                     {/if}
                   </a>
               </div>
+              <Reactions id={post.event_id}/>
+          </div>
         {/if}
 
     </div>
@@ -362,7 +360,7 @@ id={post.short_id}
             {/if}
         {/if}
         {#if loadMore && depth != 0}
-            <div class="">
+            <div class="gr-center">
                 <span class="small hov-un pointer primary"
                       on:click={loadMoreReplies}>{loadingReplies ? 'Loading' : 'Load'} More</span>
             </div>

@@ -736,25 +736,27 @@ func (cli *Client) CreatePost(p *CreatePostEvent) (*RespSendEvent, error) {
 }
 
 type ReactToPostEvent struct {
-	RoomID  string `json:"room_id"`
-	EventID string `json:"event_id"`
-	Key     string `json:"key"`
+	RoomID            string `json:"room_id"`
+	RoomCreateEventID string `json:"room_create_event_id"`
+	EventID           string `json:"event_id"`
+	Key               string `json:"key"`
 }
 
 func (cli *Client) ReactToPost(p *ReactToPostEvent) (*RespSendEvent, error) {
 
-	post := Post{
-		MsgType:       "m.reaction",
-		Body:          p.Key,
-		FormattedBody: p.Key,
+	r := ReqReaction{
+		MRelatesTo: map[string]string{
+			"event_id": p.EventID,
+			"key":      p.Key,
+			"rel_type": "m.annotation",
+		},
+		MRelationship: map[string]string{
+			"rel_type": "m.reference",
+			"event_id": p.RoomCreateEventID,
+		},
 	}
 
-	post.MRelationship = map[string]string{
-		"rel_type": "m.reference",
-		"event_id": p.EventID,
-	}
-
-	return cli.SendMessageEvent(p.RoomID, "com.hummingbard.post", post)
+	return cli.SendMessageEvent(p.RoomID, "m.reaction", r)
 }
 
 // SendImage sends an m.room.message event into the given room with a msgtype of m.image
@@ -1053,7 +1055,7 @@ func (cli *Client) Download(fileID, homeserverURL string) ([]byte, error) {
 }
 
 func txnID() string {
-	return "go" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	return "m" + strconv.FormatInt(time.Now().UnixNano(), 10)
 }
 
 func (cli *Client) RegisterAvailable(req *ReqRegisterAvailable) (resp *RespRegisterAvailable, err error) {

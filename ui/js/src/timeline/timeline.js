@@ -257,6 +257,22 @@ if(reacts && authenticated) {
   })
 }
 
+let reactions = document.querySelectorAll(`.reactions`)
+if(reactions) {
+  import('../post/reactions/reactions.svelte').then(res => {
+    reactions.forEach(reaction => {
+      new res.default({
+          target: reaction,
+          props: {
+            id: reaction.dataset.id,
+          },
+          hydrate: true
+      });
+    })
+  })
+}
+
+
 let menus = document.querySelectorAll(`.post-menu`)
 if(menus && authenticated) {
   import('../post/menu/menu.svelte').then(res => {

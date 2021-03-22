@@ -72,7 +72,6 @@ async function fetchFollowing() {
     if(authenticated && identity?.access_token) {
         options.headers['Authorization'] = identity.access_token
     }
-    console.log(options)
 
     let resp = await fetch(endpoint, options)
     const ret = await resp.json()
