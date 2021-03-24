@@ -4,12 +4,46 @@ import { settings,state } from '../store.js'
 
 
 function updateAvatar(e) {
-  console.log("lol", e.detail)
   $settings.info.avatar = e.detail
+    setAvatar()
 }
 
 function removeAvatar(e) {
   $settings.info.avatar = null
+    setAvatar()
+}
+
+async function saveState() {
+    let endpoint = `/room/avatar/update`
+
+    let data = {
+      room_id: window.timeline.room_id,
+      profile: window.timeline.profile,
+      avatar: $settings.info.avatar,
+    }
+  console.log(data)
+
+    let resp = await fetch(endpoint, {
+    method: 'POST', // or 'PUT'
+    body: JSON.stringify(data),
+    headers:{
+      'Authorization': identity.access_token,
+        'Content-Type': 'application/json'
+    }
+    })
+    if (resp.ok) { // if HTTP-status is 200-299
+    } else {
+      alert("HTTP-Error: " + resp.status);
+    }
+    const ret = await resp.json()
+    return Promise.resolve(ret)
+}
+
+function setAvatar() {
+  saveState().then((res) => {
+    console.log(res)
+  }).then(() => {
+  })
 }
 
 

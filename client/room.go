@@ -314,9 +314,8 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			RoomID  string `json:"room_id"`
 			Profile bool   `json:"profile"`
 			Info    struct {
-				Title  string `json:"title"`
-				About  string `json:"about"`
-				Avatar string `json:"avatar"`
+				Title string `json:"title"`
+				About string `json:"about"`
 			} `json:"info"`
 			Appearance struct {
 				Header string `json:"header"`
@@ -371,8 +370,6 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			err = matrix.SetDisplayName(pay.Info.Title)
 			if err != nil {
 				log.Println(err)
-				log.Println(err)
-				log.Println(err)
 				http.Error(w, err.Error(), 400)
 				return
 			}
@@ -419,8 +416,72 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 			return
 		}
 
-		avatar := pay.Info.Avatar
-		if len(pay.Info.Avatar) == 0 {
+		ff.Updated = true
+
+		js, err := json.Marshal(ff)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
+
+	}
+}
+
+func (c *Client) UpdateAvatar() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("Authorization")
+
+		user, err := c.GetTokenUser(token)
+		if err != nil || user == nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		type payload struct {
+			RoomID  string `json:"room_id"`
+			Profile bool   `json:"profile"`
+			Avatar  string `json:"avatar"`
+		}
+
+		var pay payload
+		if r.Body == nil {
+			log.Println(err)
+			http.Error(w, "Please send a request body", 400)
+			return
+		}
+		err = json.NewDecoder(r.Body).Decode(&pay)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		log.Println("recieved payload ", pay)
+
+		type Response struct {
+			Updated bool `json:"updated"`
+		}
+
+		matrix, err := c.TempMatrixClient(user.UserID, user.MatrixAccessToken)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, err.Error(), 400)
+			return
+		}
+
+		ff := Response{}
+
+		owner := false
+		if pay.Profile && user.RoomID == pay.RoomID {
+			owner = true
+		}
+
+		avatar := pay.Avatar
+		if len(pay.Avatar) == 0 {
 			avatar = ""
 		}
 
@@ -441,7 +502,7 @@ func (c *Client) UpdateRoomInfo() http.HandlerFunc {
 				http.Error(w, err.Error(), 400)
 				return
 			}
-			c.UpdateAvatar(r, pay.Info.Avatar)
+			c.SetUserAvatar(r, pay.Avatar)
 		}
 
 		ff.Updated = true

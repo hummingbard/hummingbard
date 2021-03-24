@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"hummingbard/gomatrix"
-	"log"
 	"sort"
 	"strings"
 	"time"
@@ -125,7 +124,6 @@ func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event,
 	events := []gomatrix.Event{}
 
 	for i, _ := range resp {
-		log.Println(resp[i].Type)
 
 		if resp[i].Type == "m.reaction" {
 			reactions = append(reactions, &resp[i])
@@ -170,8 +168,6 @@ func (c *Client) ProcessMessages(resp []gomatrix.Event, state []*gomatrix.Event,
 				}
 			}
 		}
-
-		log.Println("reactionsa re ", len(reactions))
 
 		if !showAll {
 			if resp[i].Type == "com.hummingbard.post" || resp[i].Type == "m.reaction" {

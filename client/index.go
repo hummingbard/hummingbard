@@ -155,9 +155,24 @@ func (c *Client) IndexUser(w http.ResponseWriter, r *http.Request) {
 	posts := []gomatrix.Event{}
 	feedItems := []*IndexFeed{}
 
-	limit := 73
+	limit := 14
+
+	l := len(user.JoinedRooms)
 
 	if len(user.JoinedRooms) > 0 {
+
+		switch {
+		case l > 14:
+			limit = 2
+		case l > 9 && l < 14:
+			limit = 3
+		case l > 5 && l <= 9:
+			limit = 3
+		case l > 2 && l <= 4:
+			limit = 6
+		case l == 2:
+			limit = 8
+		}
 
 		for _, room := range user.JoinedRooms {
 			matrix.Prefix = "/_matrix/client/r0"
@@ -343,9 +358,24 @@ func (c *Client) GetFeedEvents() http.HandlerFunc {
 		posts := []gomatrix.Event{}
 		feedItems := []*IndexFeed{}
 
-		limit := 73
+		limit := 14
+
+		l := len(pay.Feed)
 
 		if len(pay.Feed) > 0 {
+
+			switch {
+			case l > 14:
+				limit = 2
+			case l > 9 && l < 14:
+				limit = 3
+			case l > 5 && l <= 9:
+				limit = 3
+			case l > 2 && l <= 4:
+				limit = 6
+			case l == 2:
+				limit = 8
+			}
 
 			for _, room := range pay.Feed {
 				matrix.Prefix = "/_matrix/client/r0"

@@ -124,10 +124,14 @@ async function saveState() {
     return Promise.resolve(ret)
 }
 
+let saving = false;
+
 function save() {
+  saving = true
   saveState().then((res) => {
     console.log(res)
     if(res?.updated) {
+      saving = false
       kill()
     }
   }).then(() => {
@@ -213,11 +217,16 @@ $: if(subTab) {
 
 
         <div class="flex mt4">
-
           <div class="">
-            <button on:click={save}>Save</button>
-            <button class="light" on:click={kill}>Cancel</button>
+              <button on:click={save} disabled={saving}>Save</button>
+              {#if !saving}
+                <button class="light" on:click={kill}>Cancel</button>
+                {/if}
           </div>
+            {#if saving}
+                <div class="lds-ring gr-center ml3"><div></div><div></div><div></div><div></div></div>
+            {/if}
+
 
         </div>
 

@@ -365,7 +365,7 @@ func (c *Client) UpdateDisplayName(r *http.Request, displayName string) error {
 	return nil
 }
 
-func (c *Client) UpdateAvatar(r *http.Request, avatar string) error {
+func (c *Client) SetUserAvatar(r *http.Request, avatar string) error {
 	s, err := c.Sessions.Get(r, c.Config.Client.CookieName)
 	if err != nil {
 		log.Println(err)

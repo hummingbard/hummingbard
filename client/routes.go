@@ -171,6 +171,7 @@ func routes(c *Client) chi.Router {
 		r.Post("/state", c.GetRoomState())
 		r.Post("/info", c.GetRoomInfo())
 		r.Post("/info/update", c.UpdateRoomInfo())
+		r.Post("/avatar/update", c.UpdateAvatar())
 		r.Post("/members", c.GetRoomMembers())
 	})
 
