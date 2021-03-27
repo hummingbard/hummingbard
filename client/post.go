@@ -41,6 +41,8 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 						Image       string `json:"image"`
 						IsYoutube   bool   `json:"is_youtube"`
 						YoutubeID   string `json:"youtube_id"`
+						IsVimeo     bool   `json:"is_vimeo"`
+						VimeoID     string `json:"vimeo_id"`
 					} `json:"metadata"`
 				} `json:"links"`
 				Images []struct {
@@ -303,8 +305,17 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 					Href:        x.Href,
 					Title:       x.Metadata.Title,
 					Description: x.Metadata.Description,
-					IsYoutube:   x.Metadata.IsYoutube,
-					YoutubeID:   x.Metadata.YoutubeID,
+					Image:       x.Metadata.Image,
+				}
+				if x.Metadata.IsYoutube {
+					t := true
+					y.IsYoutube = &t
+					y.YoutubeID = &x.Metadata.YoutubeID
+				}
+				if x.Metadata.IsVimeo {
+					t := true
+					y.IsVimeo = &t
+					y.VimeoID = &x.Metadata.VimeoID
 				}
 
 				links = append(links, y)

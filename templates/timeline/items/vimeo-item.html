@@ -1,0 +1,46 @@
+{{define "vimeo-item"}}
+<div class="vimeo mb3" 
+  data-id={{index . "vimeo_id"}}
+  data-title={{index . "title"}}
+  data-href={{index . "href"}}
+  data-image={{index . "image"}}
+  data-description={{index . "description"}}>
+  <div class="link-item flex">
+    {{$id := index . "vimeo_id"}}
+    <div class="vp-i bg-img gr-default pointer"
+         style="background-image: url({{index . "image"}};">
+      <div class="gr-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+      <defs>
+          <image width="40" height="40" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAAAXNSR0IB2cksfwAAAJBQTFRFAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBYmJidXV1CAgIenp6////5OTkYmJiAQEB7+/vAQEBY2NjdXV1AQEBY2NjAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBsx3KIgAAADB0Uk5TAAw7g77c8/0Yh93/hhmo+qda5Vmcmwe4/tbS8eD/6tT06jrU0fLT/IL5F6bkWJq3xQuJawAAATVJREFUeJyNldl6gyAQhUdFMS7RaozpYtOaWtOs7/92BWsRYTCcO+X/jswwHAFkOa5H/IDSwCee64BJ4SqisRCNkhDF0nUWK8ryVOeeChXjKkoFczYYxlXNtrqtdyZwV28lv9qEcdWT58boN3hWoo4ljGusKEXrlVX8dWktXjy/vOJkPpzH1Oe35n3/gYEZP6NVLIFN84m6Jqw10RxsUNfIAZeqIOZKW/BiHWSuB8XVA4KCmisB3wBy12Ba8iEwgsz1S7h2QBdA5vo9GvWPwIMArT9tXYx1eywbfrQ/QuuhgGQOGsfManB/TnzEc/FsvApny8t1GdOqfARe/y92tRwAN8tIuUsxtRRSdymkmGdlAm9qQpdo7ZcraEpzPZrPeIqHiRL2JxQbttqy30fX951Pju18c7+whEyqDwiKzQAAAABJRU5ErkJggg=="/>
+      </defs>
+      <style>
+          tspan { white-space:pre }
+      </style>
+      <use id="Background" href="#img1" x="0" y="0" />
+  </svg>
+        </div>
+    </div>
+    <div class="gr-default ph3">
+      <div class="gr-center flex flex-column">
+        <div class="fs-09 clmp-2">
+          <a href="{{index . "href"}}">
+            <span class="primary">
+              {{index . "title"}}
+            </span>
+          </a>
+        </div>
+
+        <div class="mt1 smaller o-90 clmp-2">
+          {{index . "description"}}
+        </div>
+
+        <div class="mt1 smaller o-90 clmp-2">
+          {{index . "href"}}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}

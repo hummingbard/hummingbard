@@ -3,9 +3,12 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,12 +50,14 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 		log.Println("recieved payload ", pay)
 
 		type Response struct {
-			Title       string `json:"title,omitempty"`
-			Author      string `json:"author,omitempty"`
-			Description string `json:"description,omitempty"`
-			Image       string `json:"image,omitempty"`
-			IsYoutube   bool   `json:"is_youtube,omitempty"`
-			YoutubeID   string `json:"youtube_id,omitempty"`
+			Title       string  `json:"title,omitempty"`
+			Author      string  `json:"author,omitempty"`
+			Description string  `json:"description,omitempty"`
+			Image       string  `json:"image,omitempty"`
+			IsYoutube   *bool   `json:"is_youtube,omitempty"`
+			YoutubeID   *string `json:"youtube_id,omitempty"`
+			IsVimeo     *bool   `json:"is_vimeo,omitempty"`
+			VimeoID     *string `json:"vimeo_id,omitempty"`
 		}
 
 		ff := Response{}
@@ -67,6 +72,8 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 
 		isYoutube := up.Host == "www.youtube.com" || up.Host == "youtube.com"
 		isShortYoutube := up.Host == "youtu.be"
+
+		isVimeo := up.Host == "www.vimeo.com" || up.Host == "vimeo.com"
 
 		var title, description, image, author string
 
@@ -124,8 +131,56 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 					description = description[:500]
 				}
 
-				ff.IsYoutube = true
-				ff.YoutubeID = id
+				yt := true
+				ff.IsYoutube = &yt
+				ff.YoutubeID = &id
+
+				log.Println("what is it ", &id)
+				log.Println("what is it ", &id)
+				log.Println("what is it ", &id)
+				log.Println("what is it ", &id)
+				log.Println("what is it ", &id)
+			}
+
+		} else if isVimeo {
+			type video struct {
+				Type         string `json:"type"`
+				Title        string `json:"title"`
+				HTML         string `json:"html"`
+				Description  string `json:"description"`
+				ThumbnailURL string `json:"thumbnail_url"`
+				VideoID      int64  `json:"video_id"`
+			}
+
+			id := up.Path[1:]
+
+			endpoint := fmt.Sprintf(`https://vimeo.com/api/oembed.json?url=https://vimeo.com/%s`, id)
+
+			resp, err := http.Get(endpoint)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			defer resp.Body.Close()
+			bodyBytes, _ := ioutil.ReadAll(resp.Body)
+
+			var vid video
+			json.Unmarshal(bodyBytes, &vid)
+
+			desc := vid.Description
+			if len(desc) > 160 {
+				desc = desc[:157]
+			}
+
+			title = vid.Title
+			description = desc
+			image = vid.ThumbnailURL
+
+			if vid.Type == "video" {
+				vimeoID := strconv.FormatInt(vid.VideoID, 10)
+				vi := true
+				ff.IsVimeo = &vi
+				ff.VimeoID = &vimeoID
 			}
 
 		} else {

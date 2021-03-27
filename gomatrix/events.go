@@ -109,13 +109,15 @@ type ReqReaction struct {
 }
 
 type Link struct {
-	Href        string `json:"href"`
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Author      string `json:"author,omitempty"`
-	Image       string `json:"image,omitempty"`
-	IsYoutube   bool   `json:"is_youtube"`
-	YoutubeID   string `json:"youtube_id"`
+	Href        string  `json:"href"`
+	Title       string  `json:"title,omitempty"`
+	Description string  `json:"description,omitempty"`
+	Author      string  `json:"author,omitempty"`
+	Image       string  `json:"image,omitempty"`
+	IsYoutube   *bool   `json:"is_youtube"`
+	YoutubeID   *string `json:"youtube_id"`
+	IsVimeo     *bool   `json:"is_vimeo"`
+	VimeoID     *string `json:"vimeo_id"`
 }
 
 type Attachment struct {

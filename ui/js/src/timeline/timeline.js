@@ -164,6 +164,26 @@ if(youtubes) {
   })
 }
 
+let vimeos = document.querySelectorAll(`.vimeo`)
+if(vimeos) {
+  import('../post/link/vimeo.svelte').then(res => {
+    vimeos.forEach(vimeo => {
+      new res.default({
+          target: vimeo,
+          props: {
+            id: vimeo.dataset.id,
+            title: vimeo.dataset.title,
+            description: vimeo.dataset.description,
+            href: vimeo.dataset.href,
+            image: vimeo.dataset.image,
+          },
+          hydrate: true
+      });
+    })
+  })
+}
+
+
 let ts = document.querySelector(`.room-settings`)
 if(ts && window?.timeline?.admin) {
   import('./settings/settings.svelte').then(res => {

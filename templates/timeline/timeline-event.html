@@ -227,6 +227,8 @@ id="{{.Event.ShortID}}">
               {{range $idx, $link := index .Event.Content "links"}}
                 {{if (index $link "is_youtube")}}
                   {{template "youtube-item" .}}
+                {{else if (index $link "is_vimeo")}}
+                  {{template "vimeo-item" .}}
                 {{else}}
                   <div class="link-item pa3 flex flex-column fs-09">
                     {{$title := index $link "title"}}

@@ -32,6 +32,12 @@ onMount(() => {
       if(res?.youtube_id) {
           metadata.youtube_id = res.youtube_id
       }
+      if(res?.is_vimeo) {
+          metadata.is_vimeo = res.is_vimeo
+      }
+      if(res?.vimeo_id) {
+          metadata.vimeo_id = res.vimeo_id
+      }
       dispatch('updateLinkMetadata', {
         id: link.id,
         metadata: metadata,
@@ -65,8 +71,10 @@ $: title = link?.metadata?.title?.length > 0 ? link.metadata.title : link.href
 $: titleExists = link?.metadata?.title?.length > 0
 $: descriptionExists = link?.metadata?.description?.length > 0
 
-$: youtube = link?.metadata?.is_youtube
-$: imgSrc = `https://img.youtube.com/vi/${link?.metadata?.youtube_id}/mqdefault.jpg`
+$: youtube = link?.metadata?.is_youtube || false
+$: vimeo = link?.metadata?.is_vimeo || false
+$: imgSrc = youtube ? `https://img.youtube.com/vi/${link?.metadata?.youtube_id}/mqdefault.jpg` : vimeo ? link.metadata?.image : ``
+
 
 function killMe() {
     dispatch('deleteLink', link.id)
@@ -81,7 +89,7 @@ onDestroy(() => {
 
 <div class="link-item flex">
 
-  {#if youtube}
+  {#if youtube || vimeo}
       <div class="vp-i gr-default bg-img"
       style="background-image: url({imgSrc});">
       </div>

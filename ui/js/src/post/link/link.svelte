@@ -1,5 +1,6 @@
 <script>
 import Youtube from './youtube.svelte'
+import Vimeo from './vimeo.svelte'
 export let link;
 export let reply;
 
@@ -13,6 +14,16 @@ export let reply;
         title={link.title}
         description={link.description}
         href={link.href}
+        reply={reply}
+    />
+
+{:else if link.is_vimeo}
+    <Vimeo
+        id={link.vimeo_id}
+        title={link.title}
+        description={link.description}
+        href={link.href}
+        image={link.image}
         reply={reply}
     />
 
