@@ -3,11 +3,13 @@ module hummingbard
 go 1.15
 
 require (
+	cgt.name/pkg/go-mwclient v1.2.0 // indirect
 	cloud.google.com/go v0.75.0 // indirect
 	github.com/BurntSushi/toml v0.3.1
 	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/antchfx/htmlquery v1.2.3 // indirect
 	github.com/antchfx/xmlquery v1.3.3 // indirect
+	github.com/antonholmquist/jason v1.0.0 // indirect
 	github.com/dgraph-io/ristretto v0.0.2
 	github.com/go-chi/chi v1.5.1
 	github.com/go-chi/cors v1.1.1
@@ -25,6 +27,7 @@ require (
 	github.com/matrix-org/dendrite v0.3.4
 	github.com/matrix-org/gomatrix v0.0.0-20200827122206-7dd5e2a05bcd
 	github.com/microcosm-cc/bluemonday v1.0.1
+	github.com/mrjones/oauth v0.0.0-20190623134757-126b35219450 // indirect
 	github.com/pquerna/otp v1.3.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/russross/blackfriday v1.5.2

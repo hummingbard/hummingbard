@@ -6,6 +6,7 @@ import NSFW from './nsfw/nsfw.svelte'
 import Anonymous from './anonymous/anonymous.svelte'
 import Article from './article/article.svelte'
 import ArticleSettings from './article/settings.svelte'
+import Review from './review/review.svelte'
 
 export let store;
 export let allowArticle;
@@ -29,6 +30,9 @@ $: profile = window.timeline?.profile
     </div>
     <div class="gr-center ml3">
       <Link store={store} on:addLink/>
+    </div>
+    <div class="gr-center ml3">
+      <Review store={store} on:toggleReview/>
     </div>
     <div class="gr-center ml3">
       <NSFW store={store} on:toggleNSFW/>

@@ -45,6 +45,13 @@ var fMap = template.FuncMap{
 	"Trunc":          truncate,
 	"HasColon":       hasColon,
 	"Repeat":         repeat,
+	"Iter":           iter,
+	"Rat":            rat,
+	"HTML":           html,
+}
+
+func html(s string) template.HTML {
+	return template.HTML(s)
 }
 
 func hasColon(s string) bool {
@@ -59,6 +66,15 @@ func truncate(s string, i int) string {
 	}
 
 	return s
+}
+
+func iter(n float64) []struct{} {
+	return make([]struct{}, int(n))
+}
+
+func rat(n float64) float64 {
+	x := 7 - int(n)
+	return float64(x)
 }
 
 func concat(values ...string) string {

@@ -44,6 +44,12 @@ let store = {
       active: false,
     }
   },
+  review: {
+    enabled: false,
+    title: null,
+    content: null,
+    rating: 5,
+  },
 }
 
 function kill() {
@@ -94,6 +100,14 @@ function toggleAnonymous() {
 }
 function toggleNSFW() {
   store.nsfw = !store.nsfw
+}
+function toggleReview() {
+  store.review.enabled = !store.review.enabled
+    if(!store.review.enabled) {
+        store.review.title = null
+        store.review.content = null
+        store.review.rating = 5
+    }
 }
 function lock() {
   store.locked = true
@@ -182,6 +196,12 @@ function updateAttachmentURL(e) {
   console.log(store)
 }
 
+function updateReview(e) {
+    store.review.title = e.detail.title
+    store.review.content = e.detail.content
+    store.review.rating = e.detail.rating
+}
+
 
 let editor;
 
@@ -212,7 +232,8 @@ $: if(active && editorLoaded && window.timeline?.permalink && view && !reply) {
 $: empty = (!store.content?.plain_text || store.content?.length == 0) &&
   store.images.length == 0 &&
   store.links.length == 0 &&
-  store.attachments.length == 0 
+  store.attachments.length == 0  &&
+  !store.review.enabled
 
 $: locked = store.locked
 
@@ -298,6 +319,13 @@ function create() {
     focusTitle()
     return
   }
+    if(store.review.enabled) {
+        if((!store.review.title || !store.review.content) ||
+        (store.review.title?.length == 0 || store.review.content?.length == 0)){
+            alert("Your review must have a title and content.")
+            return
+        }
+    }
   lock()
   createPost().then((res) => {
     console.log(res)
@@ -349,6 +377,14 @@ async function createPost() {
         },
       nsfw: store.nsfw,
       anonymous: store.anonymous,
+    }
+    if(store.review.enabled) {
+        data.post.review = {
+            enabled: true,
+            title: store.review.title,
+            content: store.review.content,
+            rating: store.review.rating,
+        }
     }
 
   if(window.timeline?.userFeed && window.timeline?.feed) {
@@ -598,6 +634,7 @@ transition:fade="{{duration: 33}}">
             on:updateImageMetadata={updateImageMetadata}
             on:deleteAttachment={deleteAttachment}
             on:updateAttachmentURL={updateAttachmentURL}
+            on:updateReview={updateReview}
             />
         </div>
         {/if}
@@ -621,6 +658,7 @@ transition:fade="{{duration: 33}}">
           on:addAttachment={addAttachment}
           on:toggleNSFW={toggleNSFW}
           on:toggleAnonymous={toggleAnonymous}
+          on:toggleReview={toggleReview}
           on:toggleArticleSettings={toggleArticleSettings}/>
       </div>
       {#if store.locked}

@@ -229,23 +229,38 @@ id="{{.Event.ShortID}}">
                   {{template "youtube-item" .}}
                 {{else if (index $link "is_vimeo")}}
                   {{template "vimeo-item" .}}
+                {{else if (index $link "sound_cloud_player")}}
+                  {{template "soundcloud-item" .}}
                 {{else}}
                   <div class="link-item pa3 flex flex-column fs-09">
                     {{$title := index $link "title"}}
                     {{$desc := index $link "description"}}
-                    <div class="">
-                      <a href="{{index $link "href"}}">
-                        <span class="primary">
-                        {{if $title}}
-                            {{if gt (len $title) 0}}
-                              {{index $link "title"}}
+                    {{$wik := index $link "is_wikipedia"}}
+                    <div class="flex">
+                      {{if $wik}}
+                        <div class="gr-center ico-20 mr3">
+                          {{template "wikipedia-icon"}}
+                        </div>
+                      {{end}}
+                      <div class="gr-center">
+                        <a href="{{index $link "href"}}">
+                          <span class="primary">
+                          {{if $title}}
+                              {{if gt (len $title) 0}}
+                                {{index $link "title"}}
+                            {{end}}
+                          {{else}}
+                            {{index $link "href"}}
                           {{end}}
-                        {{else}}
-                          {{index $link "href"}}
-                        {{end}}
-                        </span>
-                      </a>
+                          </span>
+                        </a>
+                      </div>
                     </div>
+                    {{if $wik}}
+                      <div class="small">
+                        {{HTML $desc}}
+                      </div>
+                    {{end}}
                     {{if $title}}
                         {{if gt (len $title) 0}}
                         <div class="small o-90 mt2">
@@ -281,6 +296,34 @@ id="{{.Event.ShortID}}">
             {{end}}
           </div>
           {{end}}
+
+          {{if index .Event.Content "com.hummingbard.review"}}
+          {{$rev := index .Event.Content "com.hummingbard.review"}}
+          <div class="brd pa3 flex flex-column fs-09 mb3">
+            <div class="">
+              <strong>{{index $rev "title"}}</strong>
+            </div>
+            <div class="mt3">
+              {{index $rev "content"}}
+            </div>
+            <div class="mt3 flex stars">
+              {{$rating := index $rev "rating"}}
+
+              {{range $idx, $_ := Iter $rating}}
+                <div class="mr1">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path></svg>
+                </div>
+              {{end}}
+              {{$rat := Rat $rating}}
+              {{range $idx, $_ := Iter $rat}}
+                <div class="mr1 o-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25zm0 2.445L6.615 5.5a.75.75 0 01-.564.41l-3.097.45 2.24 2.184a.75.75 0 01.216.664l-.528 3.084 2.769-1.456a.75.75 0 01.698 0l2.77 1.456-.53-3.084a.75.75 0 01.216-.664l2.24-2.183-3.096-.45a.75.75 0 01-.564-.41L8 2.694v.001z"></path></svg>
+                </div>
+              {{end}}
+            </div>
+          </div>
+          {{end}}
+
 
       {{else if eq $msgtype "m.image"}}
             {{$hms := .HomeServerURL}}

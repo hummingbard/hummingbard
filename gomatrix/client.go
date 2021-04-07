@@ -595,38 +595,46 @@ func (cli *Client) SendFormattedText(roomID, text, formattedText string) (*RespS
 // SendFormattedText sends an m.room.message event into the given room with a msgtype of m.text, supports a subset of HTML for formatting.
 // See https://matrix.org/docs/spec/client_server/r0.6.0#m-text
 
+type PostReview struct {
+	Enabled bool
+	Title   string
+	Content string
+	Rating  uint
+}
+
 type CreatePostEvent struct {
-	RoomID          string       `json:"room_id"`
-	RoomAlias       string       `json:"room_alias"`
-	Unsanitized     string       `json:"unsanitized"`
-	Text            string       `json:"text"`
-	FormattedText   string       `json:"formatted_text"`
-	Links           []Link       `json:"links"`
-	Images          []Image      `json:"images"`
-	Attachments     []Attachment `json:"attachments"`
-	ThreadRoomID    string       `json:"thread_room_id"`
-	ThreadRoomAlias string       `json:"thread_room_alias"`
-	ThreadInRoomID  string       `json:"thread_in_room_id"`
-	EventID         string       `json:"event_id"`
-	Root            bool         `json:"root"`
-	Reply           bool         `json:"reply"`
-	NSFW            bool         `json:"nsfw"`
-	Anonymous       bool         `json:"anonymous"`
-	Federated       bool         `json:"federated"`
-	Share           bool         `json:"share"`
-	SharedPost      *Event       `json:"shared_post"`
-	IsArticle       bool         `json:"is_article"`
-	Title           string       `json:"title"`
-	Slug            string       `json:"slug"`
-	Subtitle        string       `json:"subtitle"`
-	Description     string       `json:"description"`
-	CanonicalLink   string       `json:"canonical_link"`
-	FeaturedImage   *Image       `json:"featured_image"`
-	Edit            bool         `json:"edit"`
-	EditEventID     string       `json:"edit_event_id"`
-	ShareReply      bool         `json:"share_reply"`
-	ReplyPermalink  string       `json:"reply_permalink"`
-	ArticleContent  string       `json:"article_content"`
+	RoomID           string       `json:"room_id"`
+	RoomAlias        string       `json:"room_alias"`
+	Unsanitized      string       `json:"unsanitized"`
+	Text             string       `json:"text"`
+	FormattedText    string       `json:"formatted_text"`
+	Links            []Link       `json:"links"`
+	Images           []Image      `json:"images"`
+	Attachments      []Attachment `json:"attachments"`
+	ThreadRoomID     string       `json:"thread_room_id"`
+	ThreadRoomAlias  string       `json:"thread_room_alias"`
+	ThreadInRoomID   string       `json:"thread_in_room_id"`
+	EventID          string       `json:"event_id"`
+	Root             bool         `json:"root"`
+	Reply            bool         `json:"reply"`
+	NSFW             bool         `json:"nsfw"`
+	Anonymous        bool         `json:"anonymous"`
+	Federated        bool         `json:"federated"`
+	Share            bool         `json:"share"`
+	SharedPost       *Event       `json:"shared_post"`
+	IsArticle        bool         `json:"is_article"`
+	Title            string       `json:"title"`
+	Slug             string       `json:"slug"`
+	Subtitle         string       `json:"subtitle"`
+	Description      string       `json:"description"`
+	CanonicalLink    string       `json:"canonical_link"`
+	FeaturedImage    *Image       `json:"featured_image"`
+	Edit             bool         `json:"edit"`
+	EditEventID      string       `json:"edit_event_id"`
+	ShareReply       bool         `json:"share_reply"`
+	ReplyPermalink   string       `json:"reply_permalink"`
+	ArticleContent   string       `json:"article_content"`
+	Review           PostReview   `json:"review"`
 }
 
 func (cli *Client) CreatePost(p *CreatePostEvent) (*RespSendEvent, error) {
@@ -642,6 +650,15 @@ func (cli *Client) CreatePost(p *CreatePostEvent) (*RespSendEvent, error) {
 		NSFW:          p.NSFW,
 		Reply:         p.Reply,
 	}
+
+	if p.Review.Enabled {
+		post.Review = &Review{
+			Title:   p.Review.Title,
+			Content: p.Review.Content,
+			Rating:  p.Review.Rating,
+		}
+	}
+
 
 	if p.IsArticle && len(p.Title) > 0 {
 		post.Article = &Article{}

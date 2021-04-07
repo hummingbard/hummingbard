@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"cgt.name/pkg/go-mwclient"
+	"cgt.name/pkg/go-mwclient/params"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
@@ -50,14 +52,16 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 		log.Println("recieved payload ", pay)
 
 		type Response struct {
-			Title       string  `json:"title,omitempty"`
-			Author      string  `json:"author,omitempty"`
-			Description string  `json:"description,omitempty"`
-			Image       string  `json:"image,omitempty"`
-			IsYoutube   *bool   `json:"is_youtube,omitempty"`
-			YoutubeID   *string `json:"youtube_id,omitempty"`
-			IsVimeo     *bool   `json:"is_vimeo,omitempty"`
-			VimeoID     *string `json:"vimeo_id,omitempty"`
+			Title            string  `json:"title,omitempty"`
+			Author           string  `json:"author,omitempty"`
+			Description      string  `json:"description,omitempty"`
+			Image            string  `json:"image,omitempty"`
+			IsYoutube        *bool   `json:"is_youtube,omitempty"`
+			YoutubeID        *string `json:"youtube_id,omitempty"`
+			IsVimeo          *bool   `json:"is_vimeo,omitempty"`
+			VimeoID          *string `json:"vimeo_id,omitempty"`
+			SoundCloudPlayer *string `json:"sound_cloud_player,omitempty"`
+			IsWikipedia      *bool   `json:"is_wikipedia,omitempty"`
 		}
 
 		ff := Response{}
@@ -74,6 +78,10 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 		isShortYoutube := up.Host == "youtu.be"
 
 		isVimeo := up.Host == "www.vimeo.com" || up.Host == "vimeo.com"
+
+		isSoundCloud := up.Host == "soundcloud.com" || up.Host == "www.soundcloud.com" || up.Host == "m.soundcloud.com"
+
+		isWikipedia := up.Host == "en.wikipedia.org"
 
 		var title, description, image, author string
 
@@ -135,13 +143,52 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 				ff.IsYoutube = &yt
 				ff.YoutubeID = &id
 
-				log.Println("what is it ", &id)
-				log.Println("what is it ", &id)
-				log.Println("what is it ", &id)
-				log.Println("what is it ", &id)
-				log.Println("what is it ", &id)
 			}
 
+		} else if isWikipedia {
+			path := strings.TrimLeft(up.Path, "/")
+			spl := strings.Split(path, "/")
+			log.Println(spl)
+
+			w, err := mwclient.New("https://en.wikipedia.org/w/api.php", "HummingbardWikiScraper")
+			if err != nil {
+				log.Println(err)
+			}
+
+			parameters := params.Values{
+				"action":    "query",
+				"prop":      "extracts",
+				"format":    "html",
+				"exintro":   "",
+				"redirects": "1",
+				"titles":    spl[1],
+			}
+			response, err := w.Get(parameters)
+			if err != nil {
+				log.Println(err)
+			}
+
+			pages, err := response.GetObjectArray("query", "pages")
+			if err != nil {
+				log.Println(err)
+			}
+
+			var extract, ti string
+			for _, item := range pages {
+				extract, err = item.GetString("extract")
+				if err != nil {
+					log.Println(err)
+				}
+				ti, err = item.GetString("title")
+				if err != nil {
+					log.Println(err)
+				}
+			}
+
+			title = ti
+			description = extract
+			wi := true
+			ff.IsWikipedia = &wi
 		} else if isVimeo {
 			type video struct {
 				Type         string `json:"type"`
@@ -190,6 +237,15 @@ func (c *Client) LinkMetadata() http.HandlerFunc {
 			description = md.Description
 			author = md.Author
 			image = md.Image
+
+			if isSoundCloud && md.SoundCloud != "" {
+				scPlayer := md.SoundCloud
+				scPlayer = strings.ReplaceAll(scPlayer, `auto_play=false`, `auto_play=true`)
+
+				ff.SoundCloudPlayer = &scPlayer
+
+				image = strings.ReplaceAll(image, "500x500", "200x200")
+			}
 		}
 
 		ff.Title = title
@@ -214,6 +270,7 @@ type LinkMetaData struct {
 	Description string
 	Image       string
 	Author      string
+	SoundCloud  string
 }
 
 func (c *Client) Scrape(link string, domain string) LinkMetaData {
@@ -227,6 +284,8 @@ func (c *Client) Scrape(link string, domain string) LinkMetaData {
 	co.OnResponse(func(r *colly.Response) {
 		htmldata = string(r.Body)
 	})
+
+	isSoundCloud := domain == "soundcloud.com" || domain == "www.soundcloud.com"
 
 	co.OnHTML("head", func(e *colly.HTMLElement) {
 
@@ -256,6 +315,11 @@ func (c *Client) Scrape(link string, domain string) LinkMetaData {
 			if lmd.Image == "" && strings.EqualFold(prop, "twitter:image:src") {
 				image, _ := s.Attr("content")
 				lmd.Image = image
+			}
+
+			if isSoundCloud && strings.EqualFold(prop, "twitter:player") {
+				player, _ := s.Attr("content")
+				lmd.SoundCloud = player
 			}
 
 		})

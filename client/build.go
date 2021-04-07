@@ -13,13 +13,12 @@ import (
 )
 
 func (c *Client) Build() {
-	/*
-		BuildCSSFiles()
+	BuildCSSFiles()
 
-		if c.Config.Mode == "development" {
-			go CSSWatcher()
-		}
-	*/
+	if c.Config.Mode == "development" {
+		BuildCSSFiles()
+		go CSSWatcher()
+	}
 }
 
 func BuildCSSFiles() {

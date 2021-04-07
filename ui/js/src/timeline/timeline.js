@@ -183,6 +183,25 @@ if(vimeos) {
   })
 }
 
+let soundclouds = document.querySelectorAll(`.soundcloud`)
+if(soundclouds) {
+  import('../post/link/soundcloud.svelte').then(res => {
+    soundclouds.forEach(soundcloud => {
+      new res.default({
+          target: soundcloud,
+          props: {
+            title: soundcloud.dataset.title,
+            description: soundcloud.dataset.description,
+            href: soundcloud.dataset.href,
+            image: soundcloud.dataset.image,
+            player: soundcloud.dataset.player,
+          },
+          hydrate: true
+      });
+    })
+  })
+}
+
 
 let ts = document.querySelector(`.room-settings`)
 if(ts && window?.timeline?.admin) {

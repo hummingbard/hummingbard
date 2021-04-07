@@ -91,6 +91,13 @@ type Post struct {
 	Article         *Article          `json:"com.hummingbard.article,omitempty"`
 	ShareReply      *bool             `json:"share_reply"`
 	ReplyPermalink  *string           `json:"reply_permalink"`
+	Review          *Review           `json:"com.hummingbard.review,omitempty"`
+}
+
+type Review struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	Rating  uint   `json:"rating"`
 }
 
 type Article struct {
@@ -114,10 +121,12 @@ type Link struct {
 	Description string  `json:"description,omitempty"`
 	Author      string  `json:"author,omitempty"`
 	Image       string  `json:"image,omitempty"`
-	IsYoutube   *bool   `json:"is_youtube"`
-	YoutubeID   *string `json:"youtube_id"`
-	IsVimeo     *bool   `json:"is_vimeo"`
-	VimeoID     *string `json:"vimeo_id"`
+	IsYoutube   *bool   `json:"is_youtube,omitempty"`
+	YoutubeID   *string `json:"youtube_id,omitempty"`
+	IsVimeo     *bool   `json:"is_vimeo,omitempty"`
+	VimeoID     *string `json:"vimeo_id,omitempty"`
+	IsWikipedia *bool   `json:"is_wikipedia,omitempty"`
+	SoundCloudPlayer *string      `json:"sound_cloud_player,omitempty"`
 }
 
 type Attachment struct {

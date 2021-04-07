@@ -2,6 +2,7 @@
 import LinkItems from './tools/link/items.svelte'
 import ImageItems from './tools/image/items.svelte'
 import AttachmentItems from './tools/attachment/items.svelte'
+import ReviewView from './tools/review/view.svelte'
 import {post} from '../store.js'
 
 export let store;
@@ -30,6 +31,12 @@ export let store;
         store={store} 
         on:deleteAttachment
         on:updateAttachmentURL/>
+    {/if}
+
+    {#if store?.review?.enabled }
+        <ReviewView
+        store={store} 
+        on:updateReview/>
     {/if}
 
 {/if}

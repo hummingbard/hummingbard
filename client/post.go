@@ -35,14 +35,16 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 				Links []struct {
 					Href     string `json:"href"`
 					Metadata struct {
-						Title       string `json:"title"`
-						Author      string `json:"author"`
-						Description string `json:"description"`
-						Image       string `json:"image"`
-						IsYoutube   bool   `json:"is_youtube"`
-						YoutubeID   string `json:"youtube_id"`
-						IsVimeo     bool   `json:"is_vimeo"`
-						VimeoID     string `json:"vimeo_id"`
+						Title            string `json:"title"`
+						Author           string `json:"author"`
+						Description      string `json:"description"`
+						Image            string `json:"image"`
+						IsYoutube        bool   `json:"is_youtube"`
+						YoutubeID        string `json:"youtube_id"`
+						IsVimeo          bool   `json:"is_vimeo"`
+						VimeoID          string `json:"vimeo_id"`
+						IsWikipedia      bool   `json:"is_wikipedia"`
+						SoundCloudPlayer string `json:"sound_cloud_player"`
 					} `json:"metadata"`
 				} `json:"links"`
 				Images []struct {
@@ -74,6 +76,12 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 						Height  uint   `json:"height"`
 					} `json:"featured_image"`
 				} `json:"article"`
+				Review struct {
+					Enabled bool   `json:"enabled"`
+					Title   string `json:"title"`
+					Content string `json:"content"`
+					Rating  uint   `json:"rating"`
+				} `json:"review"`
 			} `json:"post"`
 			Page             bool   `json:"page"`
 			Reply            bool   `json:"reply"`
@@ -317,6 +325,13 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 					y.IsVimeo = &t
 					y.VimeoID = &x.Metadata.VimeoID
 				}
+				if x.Metadata.IsWikipedia {
+					t := true
+					y.IsWikipedia = &t
+				}
+				if len(x.Metadata.SoundCloudPlayer) > 0 {
+					y.SoundCloudPlayer = &x.Metadata.SoundCloudPlayer
+				}
 
 				links = append(links, y)
 			}
@@ -358,6 +373,13 @@ func (c *Client) CreateNewPost() http.HandlerFunc {
 				attachments = append(attachments, y)
 			}
 			npe.Attachments = attachments
+		}
+
+		if pay.Post.Review.Enabled {
+			npe.Review.Enabled = true
+			npe.Review.Title = pay.Post.Review.Title
+			npe.Review.Content = pay.Post.Review.Content
+			npe.Review.Rating = pay.Post.Review.Rating
 		}
 
 		npe.RoomID = pay.RoomID
