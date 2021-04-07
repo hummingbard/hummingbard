@@ -339,7 +339,7 @@ id={post.short_id}
             {/if}
 
             {#if review}
-            <div class="brd pa3 flex flex-column fs-09 mb3">
+            <div class="link-item pa3 flex flex-column fs-09 mb3">
 
                 <div class="">
                   <strong>{reviewTitle}</strong>

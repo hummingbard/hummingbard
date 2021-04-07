@@ -326,7 +326,7 @@ svg:hover {
 
 .link-item {
   border: 1px solid var(--primary-grayish);
-  border-radius: 17px;
+  border-radius: 7px;
   margin-bottom: 1rem;
 }
 
