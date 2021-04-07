@@ -244,6 +244,11 @@ id={post.short_id}
               posted an article
           {/if}
 
+          {#if review && !nested && !embed}
+              posted a review
+          {/if}
+
+
           {#if !nestedReply && !reply && (!post.content?.share_reply)}
               {#if !window.timeline?.permalink}
                   {#if post?.content?.room_path?.length > 0 && showPath}

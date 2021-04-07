@@ -88,6 +88,12 @@ id="{{.Event.ShortID}}">
           posted an article
           {{end}}
 
+          {{if index .Event.Content "com.hummingbard.review"}}
+          {{if not .Nested}}
+          posted a review
+          {{end}}
+          {{end}}
+
             {{$shtp := "a post"}}
             {{if .Event.SharedPost}}
              {{$rp := index .Event.SharedPost.Content "share_reply"}}
